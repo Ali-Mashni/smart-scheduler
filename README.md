@@ -18,7 +18,7 @@ SWE363_project/
 │   └── .gitignore
 ├── README.md
 └── .gitignore            # (optional, root level)
-
+```
 
 ---
 
@@ -34,6 +34,7 @@ SWE363_project/
 ## ⚛️ Frontend (React)
 
 To run the frontend locally:
+
 
 ```bash
 cd client
