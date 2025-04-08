@@ -8,16 +8,30 @@ A full-stack scheduling assistant built for the SWE 363 course. This project hel
 
 ```plaintext
 SWE363_project/
-├── client/               # React frontend
-├── server/               # Node.js + Express backend
+├── client/                         # React frontend
+│   ├── public/
+│   │   ├── favicon.ico
+│   │   ├── index.html
+│   │   └── robots.txt
+│   ├── src/
+│   │   ├── components/             # Reusable UI components
+│   │   ├── pages/                  # Full screen/page views
+│   │   ├── assets/                 # Images, logos, etc.
+│   │   ├── App.js
+│   │   ├── App.css
+│   │   ├── index.js
+│   │   └── index.css
+│   ├── package.json
+│   └── .gitignore
+├── server/                         # Node.js + Express backend
 │   ├── routes/
-│   ├── .env              # environment variables (ignored in Git)
-│   ├── .env.example      # Template for teammates
+│   ├── .env                        # Environment variables (ignored by Git)
+│   ├── .env.example                # Template for teammates
 │   ├── server.js
 │   ├── package.json
 │   └── .gitignore
 ├── README.md
-└── .gitignore            # (optional, root level)
+└── .gitignore                      # (optional) Root-level ignore file
 ```
 
 ---
