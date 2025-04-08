@@ -35,7 +35,7 @@ SWE363_project/
 Run the following to clone the repository and enter the project folder:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/smart-scheduler.git
+git clone https://github.com/Ali-Mashni/smart-scheduler.git
 cd smart-scheduler
 ```
 
@@ -102,7 +102,7 @@ This will run the backend at:
 
 ---
 
-## 👥 Team Members
+## Team Members
 
 - Ali  
 - Teammate 1  
