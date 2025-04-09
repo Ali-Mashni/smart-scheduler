@@ -11,10 +11,10 @@ function App() {
   }, []);
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Smart Scheduler Test</h1>
-      <p>Message from backend:</p>
-      <pre style={{ backgroundColor: '#f4f4f4', padding: '1rem' }}>{msg}</pre>
+    <div className="p-8 font-sans">
+      <h1 className="text-3xl font-bold mb-4 ">Smart Scheduler Test</h1>
+      <p className="text-lg">Message from backend:</p>
+      <pre className="bg-gray-100 p-4 rounded mt-2 text-sm">{msg}</pre>
     </div>
   );
 }
