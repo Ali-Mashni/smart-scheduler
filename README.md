@@ -1,6 +1,6 @@
 #  Smart Scheduler
 
-A full-stack scheduling assistant built for the SWE 363 course. This project helps users manage their time and schedule smartly, using a React frontend, Node.js backend, and (soon) MongoDB database.
+A full-stack scheduling assistant built for the SWE 363 course. This project helps users manage their time and schedule smartly, using a **React frontend styled with Tailwind CSS**, a Node.js backend, and (soon) MongoDB database.
 
 ---
 
