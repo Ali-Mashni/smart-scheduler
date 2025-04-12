@@ -1,21 +1,24 @@
-import React, { useEffect, useState } from 'react';
+// App.js
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import HomePage from './pages/HomePage';
 function App() {
-  const [msg, setMsg] = useState('');
-
-  useEffect(() => {
-    fetch('/api/message')
-      .then((res) => res.json())
-      .then((data) => setMsg(data.message))
-      .catch((err) => console.error('Error fetching message:', err));
-  }, []);
+  
 
   return (
-    <div className="p-8 font-sans">
-      <h1 className="text-3xl font-bold mb-4 ">Smart Scheduler Test</h1>
-      <p className="text-lg">Message from backend:</p>
-      <pre className="bg-gray-100 p-4 rounded mt-2 text-sm">{msg}</pre>
-    </div>
+    <Router>
+      <Routes>
+        {/* Default redirect to login */}
+        <Route path="/" element={<HomePage />} />        
+        {/* Auth pages */}
+        <Route path="/login" element={<LoginPage  />} />
+        <Route path="/signup" element={<SignupPage />} />
+
+        {/* You can add other pages here later */}
+      </Routes>
+    </Router>
   );
 }
 
