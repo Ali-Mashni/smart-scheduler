@@ -7,7 +7,7 @@ A full-stack scheduling assistant built for the SWE 363 course. This project hel
 ## 📁 Project Structure
 
 ```plaintext
-SWE363_project/
+smart-scheduler/
 ├── client/                         # React frontend
 │   ├── public/
 │   │   ├── favicon.ico
@@ -71,7 +71,7 @@ This will start the React app at:
 > Make sure this exists in `client/package.json`:
 
 ```json
-"proxy": "http://localhost:5000"
+"proxy": "http://localhost:5050"
 ```
 
 ---
@@ -89,7 +89,7 @@ npm install
 
 Then, create a `.env` file in the `server/` folder with the following content: 
 ```js
-PORT=5000
+PORT=5050
 ```
 ### ▶️ Run the Backend with nodemon
 
@@ -112,7 +112,7 @@ nodemon server.js
 ```
 
 This will run the backend at:  
-`http://localhost:5000`
+`http://localhost:5050`
 
 ---
 
