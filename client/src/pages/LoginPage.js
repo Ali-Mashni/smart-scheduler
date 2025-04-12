@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import AuthLayout from '../components/AuthLayout .js';
+import { Link } from 'react-router-dom';
 import TextInput from '../components/TextInput.js';
 import PrimaryButton from '../components/PrimaryButton.js';
 import PasswordInput from '../components/PasswordInput';
-
+import loginImage from '../assets/Log_in_image.png';
+import TopBar from '../components/TopBar';
+import TopBarButton from '../components/TopBarButton';
 
 const users = [
   { username: 'student', password: '123', role: 'student' },
@@ -28,51 +30,61 @@ export default function LoginPage({ setUser }) {
   };
 
   return (
-    <AuthLayout>
-      {/* Left side image */}
-      <div
-        className="w-1/2 bg-cover bg-center hidden md:block"
-        style={{
-          backgroundImage:
-            "url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0ZmZzrDHegEhRmWCYE5aOKxYanYKgX5ehGw&s')",
-        }}
-      >
-        <div className="h-full w-full bg-black bg-opacity-50 flex items-end p-8">
-          <h2 className="text-lg font-semibold text-white">
-            Organize Your Journey
-          </h2>
+    <div className="min-h-screen bg-bgMain text-white">
+      {/* TopBar */}
+      <TopBar>
+          <TopBarButton to="/" active>Home</TopBarButton>
+          <TopBarButton to="/login">Login</TopBarButton>
+          <TopBarButton to="/signup">Signup</TopBarButton>
+        </TopBar>
+
+      {/* Login content layout */}
+      <div className="flex items-center justify-center px-4 py-10">
+        <div className="flex w-full max-w-5xl rounded-2xl overflow-hidden shadow-lg bg-bgCard flex-col md:flex-row">
+          {/* Left image with overlay */}
+          <div className="w-full md:w-1/2 relative hidden md:block bg-[#181231]">
+            <img
+              src={loginImage}
+              alt="Login"
+              className="w-full h-full object-contain"
+            />
+            <div className="absolute bottom-6 left-10 text-white">
+              <h2 className="text-2xl font-semibold">Organize Your Journey</h2>
+            </div>
+          </div>
+
+          {/* Right side login form */}
+          <div className="w-full md:w-1/2 p-8 md:p-10">
+            <h2 className="text-2xl font-bold mb-2">Log in</h2>
+            <p className="text-sm text-gray-300 mb-10">Login to your account</p>
+
+            {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+
+            <form onSubmit={handleLogin} className="space-y-6">
+              <TextInput
+                placeholder="Username"
+                name="username"
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+              />
+              <PasswordInput
+                placeholder="Password"
+                name="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+              <PrimaryButton type="submit">Log In</PrimaryButton>
+            </form>
+
+            <div className="mt-6 text-sm text-gray-300">
+              Don't have an account?{' '}
+              <Link to="/signup" className="text-accent hover:underline">
+                Create an account
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Right side login form */}
-      <div className="w-full md:w-1/2 bg-bgCard p-10">
-        <h2 className="text-2xl font-bold mb-2">Log in</h2>
-        <p className="text-sm text-gray-300 mb-6">Login to your account</p>
-
-        {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
-
-        <form onSubmit={handleLogin} className="space-y-4">
-          <TextInput
-            placeholder="Username"
-            name="username"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
-          />
-          <PasswordInput
-            placeholder="Password"
-            name="password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
-          <PrimaryButton type="submit">Log In</PrimaryButton>
-        </form>
-        <div className="mt-4 text-sm text-gray-300">
-          Don't have an account?{' '}
-          <span className="text-accent hover:underline cursor-pointer">
-            Create an account
-          </span>
-        </div>
-      </div>
-    </AuthLayout>
+    </div>
   );
 }
