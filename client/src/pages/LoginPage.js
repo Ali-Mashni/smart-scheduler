@@ -33,8 +33,8 @@ export default function LoginPage({ setUser }) {
     <div className="min-h-screen bg-bgMain text-white">
       {/* TopBar */}
       <TopBar>
-          <TopBarButton to="/" active>Home</TopBarButton>
-          <TopBarButton to="/login">Login</TopBarButton>
+          <TopBarButton to="/" >Home</TopBarButton>
+          <TopBarButton to="/login" active>Login</TopBarButton>
           <TopBarButton to="/signup">Signup</TopBarButton>
         </TopBar>
 

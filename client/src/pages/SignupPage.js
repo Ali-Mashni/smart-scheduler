@@ -40,9 +40,9 @@ export default function SignupPage() {
     <div className="min-h-screen bg-bgMain text-white">
       {/* TopBar outside the main layout */}
       <TopBar>
-          <TopBarButton to="/" active>Home</TopBarButton>
+          <TopBarButton to="/" >Home</TopBarButton>
           <TopBarButton to="/login">Login</TopBarButton>
-          <TopBarButton to="/signup">Signup</TopBarButton>
+          <TopBarButton to="/signup" active>Signup</TopBarButton>
         </TopBar>
 
       {/* Signup card layout */}
