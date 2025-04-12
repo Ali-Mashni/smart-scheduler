@@ -33,27 +33,27 @@ export default function LoginPage({ setUser }) {
     <div className="min-h-screen bg-bgMain text-white">
       {/* TopBar */}
       <TopBar>
-          <TopBarButton to="/" >Home</TopBarButton>
-          <TopBarButton to="/login" active>Login</TopBarButton>
-          <TopBarButton to="/signup">Signup</TopBarButton>
-        </TopBar>
+        <TopBarButton to="/">Home</TopBarButton>
+        <TopBarButton to="/login" active>Login</TopBarButton>
+        <TopBarButton to="/signup">Signup</TopBarButton>
+      </TopBar>
 
-      {/* Login content layout */}
-      <div className="flex items-center justify-center px-4 py-10">
+      {/* Login Content */}
+      <div className="flex items-center justify-center px-4 min-h-[calc(100vh-64px)]">
         <div className="flex w-full max-w-5xl rounded-2xl overflow-hidden shadow-lg bg-bgCard flex-col md:flex-row">
-          {/* Left image with overlay */}
+          {/* Left side image */}
           <div className="w-full md:w-1/2 relative hidden md:block bg-[#181231]">
             <img
               src={loginImage}
               alt="Login"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
             />
             <div className="absolute bottom-6 left-10 text-white">
               <h2 className="text-2xl font-semibold">Organize Your Journey</h2>
             </div>
           </div>
 
-          {/* Right side login form */}
+          {/* Right side form */}
           <div className="w-full md:w-1/2 p-8 md:p-10">
             <h2 className="text-2xl font-bold mb-2">Log in</h2>
             <p className="text-sm text-gray-300 mb-10">Login to your account</p>
