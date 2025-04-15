@@ -13,6 +13,7 @@ import ManageRequestsPage from './pages/ManageRequestsPage';
 import FAQManagementPage from './pages/FAQManagementPage';
 import RequestProgressPage from './pages/RequestProgressPage';
 import CommunicationDashboardPage from './pages/CommunicationDashboardPage';
+import EscalatedTicketsPage from './pages/EscalatedTicketsPage';
 
 import FAQ  from'./pages/FAQPage'
 
@@ -46,7 +47,7 @@ function App() {
 
 
         <Route path="/customer-service" element={<CustomerServicePage />} />
-
+        <Route path="/escalated-tickets" element={<EscalatedTicketsPage />} />
         <Route path="/manage-requests" element={<ManageRequestsPage />} />
         <Route path="/faq-management" element={<FAQManagementPage />} />
         <Route path="/request-progress" element={<RequestProgressPage />} />

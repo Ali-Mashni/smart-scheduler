@@ -1,25 +1,23 @@
 // src/pages/CommunicationDashboardPage.js
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
 import PrimaryButton from '../components/PrimaryButton';
+import Toast from '../components/Toast';
 import { TicketContext } from '../context/TicketContext';
 import TicketList from '../components/TicketList';
 import ConversationMessages from '../components/ConversationMessages';
 
 export default function CommunicationDashboardPage() {
   const { tickets, addMessageToTicket, updateTicketStatus } = useContext(TicketContext);
-  
-  // Active conversations: tickets with status "In Progress"
-  const activeConversations = tickets.filter(ticket => ticket.status === 'In Progress');
 
+  const activeConversations = tickets.filter(ticket => ticket.status === 'In Progress');
   const [selectedConvId, setSelectedConvId] = useState(activeConversations[0]?.id);
   const [newMessage, setNewMessage] = useState('');
+  const [toast, setToast] = useState(null);
 
   const selectedConversation = activeConversations.find(ticket => ticket.id === selectedConvId);
 
-  // Compute conversationMessages: if the ticket has messages, check if the first message
-  // is the initial student message. If not, prepend it. Otherwise, just use the messages.
   let conversationMessages = [];
   if (selectedConversation) {
     if (selectedConversation.messages && selectedConversation.messages.length > 0) {
@@ -39,15 +37,23 @@ export default function CommunicationDashboardPage() {
     }
   }
 
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
     addMessageToTicket(selectedConvId, newMessage);
     setNewMessage('');
+    setToast({ message: 'Message sent successfully!', type: 'success' });
   };
 
-  // Close the conversation by marking it as "Resolved"
   const handleCloseConversation = () => {
     updateTicketStatus(selectedConvId, 'Resolved');
+    setToast({ message: 'Conversation marked as resolved.', type: 'success' });
   };
 
   return (
@@ -58,6 +64,8 @@ export default function CommunicationDashboardPage() {
         <TopBarButton to="/request-progress">Request Progress</TopBarButton>
         <TopBarButton to="/communication-dashboard" active>Communication</TopBarButton>
         <TopBarButton to="/customer-service">NewTicket</TopBarButton>
+        <TopBarButton to="/escalated-tickets">Escalated</TopBarButton>
+
       </TopBar>
 
       <div className="p-8">
@@ -86,6 +94,7 @@ export default function CommunicationDashboardPage() {
               />
             )}
           </div>
+
           {/* Main Panel: Conversation Details and Reply Area */}
           <div className="w-full md:w-2/3">
             {selectedConversation ? (
@@ -111,11 +120,20 @@ export default function CommunicationDashboardPage() {
                 </div>
               </div>
             ) : (
-              <>No conversation selected.</>
+              <p className="text-gray-400">No conversation selected.</p>
             )}
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

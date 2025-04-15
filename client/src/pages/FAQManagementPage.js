@@ -1,11 +1,11 @@
-// src/pages/FAQManagementPage.js
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useMemo, useEffect } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
 import PrimaryButton from '../components/PrimaryButton';
 import TextInput from '../components/TextInput';
 import FAQItem from '../components/FAQItem';
 import FAQForm from '../components/FAQForm';
+import Toast from '../components/Toast';
 import { FAQContext } from '../context/FAQContext';
 
 export default function FAQManagementPage() {
@@ -15,12 +15,20 @@ export default function FAQManagementPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [faqEdit, setFaqEdit] = useState({ question: '', answer: '' });
   const [isNewFAQ, setIsNewFAQ] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const filteredFAQs = useMemo(() => {
     return faqs.filter((faq) =>
       faq.question.toLowerCase().includes(search.toLowerCase())
     );
   }, [faqs, search]);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const handleSelectFAQ = (faqId) => {
     setSelectedFAQId(faqId);
@@ -45,6 +53,7 @@ export default function FAQManagementPage() {
     updateFAQ(selectedFAQId, { id: selectedFAQId, ...faqEdit });
     setIsEditing(false);
     setIsNewFAQ(false);
+    setToast({ message: 'FAQ saved successfully!', type: 'success' });
   };
 
   const handleDeleteFAQ = () => {
@@ -54,6 +63,7 @@ export default function FAQManagementPage() {
       setIsEditing(false);
       setFaqEdit({ question: '', answer: '' });
       setIsNewFAQ(false);
+      setToast({ message: 'FAQ deleted successfully.', type: 'success' });
     }
   };
 
@@ -89,6 +99,8 @@ export default function FAQManagementPage() {
         <TopBarButton to="/request-progress">Request Progress</TopBarButton>
         <TopBarButton to="/communication-dashboard">Communication</TopBarButton>
         <TopBarButton to="/customer-service">NewTicket</TopBarButton>
+        <TopBarButton to="/escalated-tickets">Escalated</TopBarButton>
+        
       </TopBar>
 
       <div className="p-8">
@@ -123,6 +135,7 @@ export default function FAQManagementPage() {
               </ul>
             )}
           </div>
+
           {/* Main Panel: FAQ detail or form */}
           <div className="w-full md:w-2/3 bg-bgCard p-6 rounded-lg shadow-lg">
             {selectedFAQ ? (
@@ -159,6 +172,15 @@ export default function FAQManagementPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
