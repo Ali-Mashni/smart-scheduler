@@ -46,8 +46,10 @@ export default function EscalatedTicketsPage() {
         <TopBarButton to="/faq-management">FAQ Management</TopBarButton>
         <TopBarButton to="/request-progress">Request Progress</TopBarButton>
         <TopBarButton to="/communication-dashboard">Communication</TopBarButton>
-        <TopBarButton to="/customer-service">NewTicket</TopBarButton>
+        <TopBarButton to="/customer-service">New Ticket</TopBarButton>
         <TopBarButton to="/escalated-tickets" active>Escalated</TopBarButton>
+        <TopBarButton to="/support">Support</TopBarButton>
+
       </TopBar>
 
       <div className="p-8">

@@ -8,13 +8,13 @@ import StudentSchedulePage from './pages/schedulePage';
 import PerformancePage from './pages/Performance';
 import ActivityManagementPage from './pages/ActivityManagementPage';
 import CustomerServicePage from './pages/CustomerServicePage' ;
+import StudentSupportPage from './pages/StudentSupportPage';
 
 import ManageRequestsPage from './pages/ManageRequestsPage';
 import FAQManagementPage from './pages/FAQManagementPage';
 import RequestProgressPage from './pages/RequestProgressPage';
 import CommunicationDashboardPage from './pages/CommunicationDashboardPage';
 import EscalatedTicketsPage from './pages/EscalatedTicketsPage';
-
 import FAQ  from'./pages/FAQPage'
 
 import { TicketProvider } from './context/TicketContext';
@@ -44,6 +44,7 @@ function App() {
         <Route path="/schedule" element={<StudentSchedulePage />} />
         <Route path="/activityManagement" element={<ActivityManagementPage />} />
         <Route path="/performance" element={<PerformancePage />} />
+        <Route path="/support" element={<StudentSupportPage />} />
 
 
         <Route path="/customer-service" element={<CustomerServicePage />} />

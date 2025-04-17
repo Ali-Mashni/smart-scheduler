@@ -40,8 +40,10 @@ export default function CustomerServicePage() {
         <TopBarButton to="/faq-management">FAQ Management</TopBarButton>
         <TopBarButton to="/request-progress">Request Progress</TopBarButton>
         <TopBarButton to="/communication-dashboard">Communication</TopBarButton>
-        <TopBarButton to="/customer-service" active>NewTicket</TopBarButton>
+        <TopBarButton to="/customer-service" active>New Ticket</TopBarButton>
         <TopBarButton to="/escalated-tickets">Escalated</TopBarButton>
+        <TopBarButton to="/support">Support</TopBarButton>
+
         
       </TopBar>
 

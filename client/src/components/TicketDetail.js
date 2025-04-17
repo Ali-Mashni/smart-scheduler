@@ -1,4 +1,3 @@
-// src/components/TicketDetail.js
 import React from 'react';
 import PrimaryButton from './PrimaryButton';
 

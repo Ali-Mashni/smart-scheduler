@@ -1,3 +1,4 @@
+// src/context/TicketContext.js
 import React, { createContext, useState } from 'react';
 
 export const TicketContext = createContext();
@@ -17,12 +18,12 @@ export const TicketProvider = ({ children }) => {
     );
   };
 
-  const addMessageToTicket = (id, messageText) => {
+  const addMessageToTicket = (id, messageText, sender = 'Agent') => {
     setTickets((prev) =>
       prev.map((ticket) => {
         if (ticket.id === id) {
           const updatedMessages = ticket.messages ? [...ticket.messages] : [];
-          updatedMessages.push({ sender: 'Agent', text: messageText });
+          updatedMessages.push({ sender, text: messageText });
           return { ...ticket, messages: updatedMessages };
         }
         return ticket;
@@ -30,7 +31,6 @@ export const TicketProvider = ({ children }) => {
     );
   };
 
-  // ✅ NEW: Add admin note field to ticket
   const addAdminNoteToTicket = (id, note) => {
     setTickets((prev) =>
       prev.map((ticket) =>
@@ -46,7 +46,7 @@ export const TicketProvider = ({ children }) => {
         addTicket,
         updateTicketStatus,
         addMessageToTicket,
-        addAdminNoteToTicket, // ✅ Exported
+        addAdminNoteToTicket,
       }}
     >
       {children}

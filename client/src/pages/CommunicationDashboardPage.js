@@ -18,25 +18,6 @@ export default function CommunicationDashboardPage() {
 
   const selectedConversation = activeConversations.find(ticket => ticket.id === selectedConvId);
 
-  let conversationMessages = [];
-  if (selectedConversation) {
-    if (selectedConversation.messages && selectedConversation.messages.length > 0) {
-      if (
-        selectedConversation.messages[0].sender !== 'Student' ||
-        selectedConversation.messages[0].text !== selectedConversation.message
-      ) {
-        conversationMessages = [
-          { sender: 'Student', text: selectedConversation.message },
-          ...selectedConversation.messages,
-        ];
-      } else {
-        conversationMessages = selectedConversation.messages;
-      }
-    } else {
-      conversationMessages = [{ sender: 'Student', text: selectedConversation.message }];
-    }
-  }
-
   useEffect(() => {
     if (toast) {
       const timer = setTimeout(() => setToast(null), 3000);
@@ -45,15 +26,30 @@ export default function CommunicationDashboardPage() {
   }, [toast]);
 
   const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-    addMessageToTicket(selectedConvId, newMessage);
+    if (!newMessage.trim() || !selectedConversation) return;
+    addMessageToTicket(selectedConvId, newMessage.trim());
     setNewMessage('');
-    setToast({ message: 'Message sent successfully!', type: 'success' });
+    setToast({ message: 'Message sent!', type: 'success' });
   };
 
   const handleCloseConversation = () => {
     updateTicketStatus(selectedConvId, 'Resolved');
     setToast({ message: 'Conversation marked as resolved.', type: 'success' });
+  };
+
+  const buildConversation = () => {
+    if (!selectedConversation) return [];
+    const { message, messages = [] } = selectedConversation;
+
+    // Avoid duplication if the first message is already added in the thread
+    const hasInitial =
+      messages.length > 0 &&
+      messages[0].text === message &&
+      messages[0].sender === 'Student';
+
+    return hasInitial
+      ? messages
+      : [{ sender: 'Student', text: message }, ...messages];
   };
 
   return (
@@ -63,15 +59,15 @@ export default function CommunicationDashboardPage() {
         <TopBarButton to="/faq-management">FAQ Management</TopBarButton>
         <TopBarButton to="/request-progress">Request Progress</TopBarButton>
         <TopBarButton to="/communication-dashboard" active>Communication</TopBarButton>
-        <TopBarButton to="/customer-service">NewTicket</TopBarButton>
-        <TopBarButton to="/escalated-tickets">Escalated</TopBarButton>
-
+        <TopBarButton to="/customer-service">New Ticket</TopBarButton>
+                <TopBarButton to="/support">Support</TopBarButton>
+        
       </TopBar>
 
       <div className="p-8">
         <h2 className="text-2xl font-bold mb-4">Communication Dashboard</h2>
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Sidebar: List of active conversations */}
+          {/* Sidebar */}
           <div className="w-full md:w-1/3">
             <h3 className="text-xl mb-2">Conversations</h3>
             {activeConversations.length === 0 ? (
@@ -95,14 +91,14 @@ export default function CommunicationDashboardPage() {
             )}
           </div>
 
-          {/* Main Panel: Conversation Details and Reply Area */}
+          {/* Main Panel */}
           <div className="w-full md:w-2/3">
             {selectedConversation ? (
-              <div>
-                <h3 className="text-xl mb-2">
+              <>
+                <h3 className="text-xl font-bold mb-2">
                   Conversation with {selectedConversation.name}
                 </h3>
-                <ConversationMessages messages={conversationMessages} />
+                <ConversationMessages messages={buildConversation()} />
                 <textarea
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
@@ -118,7 +114,7 @@ export default function CommunicationDashboardPage() {
                     Close Conversation
                   </PrimaryButton>
                 </div>
-              </div>
+              </>
             ) : (
               <p className="text-gray-400">No conversation selected.</p>
             )}
@@ -126,7 +122,7 @@ export default function CommunicationDashboardPage() {
         </div>
       </div>
 
-      {/* Toast Notification */}
+      {/* Toast */}
       {toast && (
         <Toast
           message={toast.message}
