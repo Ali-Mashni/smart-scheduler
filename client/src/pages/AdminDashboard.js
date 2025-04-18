@@ -222,10 +222,10 @@ export default function AdminDashboard() {
                 </div>
             </TopBar>
 
-            <div className="flex flex-grow overflow-hidden">
+            {/* ✅ Responsive wrapping layout */}
+            <div className="flex flex-grow flex-wrap md:flex-nowrap overflow-auto">
                 {/* Left Sidebar */}
-                <div className="w-[220px] border-r border-gray-700 flex flex-col">
-                    {/* Main Navigation Icons */}
+                <div className="w-full md:w-[220px] border-r border-gray-700 flex flex-col">
                     <div className="flex flex-col items-center py-4 border-b border-gray-700">
                         <div className="w-10 h-10 bg-primary rounded-md flex items-center justify-center mb-3 cursor-pointer">
                             <span className="text-xl font-bold">✉️</span>
@@ -237,8 +237,6 @@ export default function AdminDashboard() {
                             <span className="text-xl font-bold">⚙️</span>
                         </div>
                     </div>
-
-                    {/* Ticket Categories */}
                     <div className="flex-grow overflow-y-auto px-4 py-4">
                         <div className="text-xs uppercase text-gray-400 mb-3">Ticket Categories</div>
                         <div
@@ -258,8 +256,8 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Central Panel (Escalated Requests) */}
-                <div className="flex-grow overflow-y-auto p-6">
+                {/* Central Panel */}
+                <div className="flex-grow min-w-[300px] overflow-y-auto p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-xl font-semibold">
                             {activeCategory === 'unresolved' ? 'Unresolved Tickets' : 'Solved Tickets'}
@@ -277,7 +275,6 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    {/* Ticket List */}
                     <div className="space-y-3">
                         {escalatedRequests.map((ticket) => (
                             <div
@@ -299,11 +296,9 @@ export default function AdminDashboard() {
                                     <div className="text-sm font-medium">{ticket.title}</div>
                                     <div className="text-xs text-gray-400">{ticket.timeLabel}</div>
                                 </div>
-                                <div className={`px-2 py-1 rounded text-xs mr-4 ${ticket.statusColor === 'red'
-                                    ? 'bg-red-900 text-red-200'
-                                    : ticket.statusColor === 'green'
-                                        ? 'bg-green-900 text-green-200'
-                                        : 'bg-blue-900 text-blue-200'
+                                <div className={`px-2 py-1 rounded text-xs mr-4 ${ticket.statusColor === 'red' ? 'bg-red-900 text-red-200'
+                                        : ticket.statusColor === 'green' ? 'bg-green-900 text-green-200'
+                                            : 'bg-blue-900 text-blue-200'
                                     }`}>
                                     {ticket.status}
                                 </div>
@@ -313,9 +308,8 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Right Panel (Website Stats and Customer Service) */}
-                <div className="w-[280px] border-l border-gray-700 p-4 overflow-y-auto">
-                    {/* Website Stats */}
+                {/* Right Sidebar */}
+                <div className="w-full md:w-[280px] border-l border-gray-700 p-4 overflow-y-auto">
                     <div
                         className="bg-bgCard rounded-md p-4 mb-6 cursor-pointer hover:bg-opacity-80 transition-all"
                         onClick={handleStatisticsClick}
@@ -325,7 +319,6 @@ export default function AdminDashboard() {
                             <span className="text-gray-400">❯</span>
                         </div>
                         <div className="flex justify-center items-center h-32 relative">
-                            {/* Create overlapping circles for stats */}
                             <div className="absolute w-20 h-20 rounded-full flex items-center justify-center text-center text-xs border-4 border-indigo-700 bg-bgMain left-6 top-2">
                                 <div>
                                     <div>{statisticsData.newUsers}</div>
@@ -347,7 +340,6 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    {/* Customer Service */}
                     <div>
                         <div className="text-sm font-medium mb-4">Customer Service</div>
                         {customerServiceStaff.map((staff) => (
