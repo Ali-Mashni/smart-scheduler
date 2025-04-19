@@ -177,10 +177,9 @@ export default function StudentSchedulePage() {
         <TopBarButton to="/activityManagement">Activity Management</TopBarButton>
         <TopBarButton to="/schedule" active>Schedule</TopBarButton>
         <TopBarButton to="/performance">Performance</TopBarButton>
+        <TopBarButton ><p onClick={handleOpenContactUs}>Contact Us</p></TopBarButton>
         <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
-            {/* Check */}
-
       {/* Contact Us Settings Modal */}
       {isContactUsOpen && (
         <ContactUsModel onClose={handleCloseContactUs} />
