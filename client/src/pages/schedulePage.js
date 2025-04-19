@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
+import ContactUsModel from '../components/ContactUsModel';
+
 
 export default function StudentSchedulePage() {
   const [activities, setActivities] = useState([]);
@@ -11,6 +13,8 @@ export default function StudentSchedulePage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const hourRefs = useRef([]);
   hourRefs.current = [];
+  const [isContactUsOpen, setisContactUsOpen] = useState(false);
+
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -133,6 +137,16 @@ export default function StudentSchedulePage() {
     setActivities(suggested);
     setShowSuggested(true);
   };
+  //Handle creation of ticket
+  // Handle opening settings modal
+  const handleOpenContactUs = () => {
+    setisContactUsOpen(true);
+  };
+
+  // Handle closing settings modal
+  const handleCloseContactUs = () => {
+    setisContactUsOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-bgMain text-white font-sans">
@@ -140,7 +154,13 @@ export default function StudentSchedulePage() {
         <TopBarButton to="/activityManagement">Activity Management</TopBarButton>
         <TopBarButton to="/schedule" active>Schedule</TopBarButton>
         <TopBarButton to="/performance">Performance</TopBarButton>
+        <TopBarButton ><p onClick={handleOpenContactUs}>Contact Us</p></TopBarButton>
+        <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
+      {/* Contact Us Settings Modal */}
+      {isContactUsOpen && (
+        <ContactUsModel onClose={handleCloseContactUs} />
+      )}
 
       <main className="flex flex-col lg:flex-row gap-6 p-6">
         <section className="flex-1 bg-bgCard p-4 rounded-xl shadow-md max-h-[80vh] overflow-auto relative">
