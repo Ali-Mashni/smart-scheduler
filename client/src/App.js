@@ -13,7 +13,7 @@ import ManageRequestsPage from './pages/ManageRequestsPage';
 import FAQManagementPage from './pages/FAQManagementPage';
 import RequestProgressPage from './pages/RequestProgressPage';
 import CommunicationDashboardPage from './pages/CommunicationDashboardPage';
-import EscalatedTicketsPage from './pages/EscalatedTicketsPage';
+
 import FAQ from './pages/FAQPage';
 import AdminDashboard from './pages/AdminDashboard';
 
