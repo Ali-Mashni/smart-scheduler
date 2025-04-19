@@ -98,10 +98,7 @@ export default function FAQManagementPage() {
         </TopBarButton>
         <TopBarButton to="/request-progress">Request Progress</TopBarButton>
         <TopBarButton to="/communication-dashboard">Communication</TopBarButton>
-        <TopBarButton to="/customer-service">New Ticket</TopBarButton>
-        <TopBarButton to="/escalated-tickets">Escalated</TopBarButton>
-        <TopBarButton to="/support">Support</TopBarButton>
-
+        <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
 
       <div className="p-8">

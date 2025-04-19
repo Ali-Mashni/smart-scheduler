@@ -95,7 +95,8 @@ export default function PerformancePage() {
         <TopBarButton to="/activityManagement">Activity Management</TopBarButton>
         <TopBarButton to="/schedule">Schedule</TopBarButton>
         <TopBarButton to="/performance" active>Performance</TopBarButton>
-        <TopBarButton ><p onClick={handleOpenContactUs}>Contact Us</p></TopBarButton>
+        <TopBarButton to ="/support" >Your Requests</TopBarButton>
+        <TopBarButton to ="/customer-service" >Contact Us</TopBarButton>
         <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
       {/* Contact Us Settings Modal */}

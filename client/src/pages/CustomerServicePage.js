@@ -36,15 +36,12 @@ export default function CustomerServicePage() {
   return (
     <div className="min-h-screen bg-bgMain text-white">
       <TopBar>
-        <TopBarButton to="/manage-requests">Manage Requests</TopBarButton>
-        <TopBarButton to="/faq-management">FAQ Management</TopBarButton>
-        <TopBarButton to="/request-progress">Request Progress</TopBarButton>
-        <TopBarButton to="/communication-dashboard">Communication</TopBarButton>
-        <TopBarButton to="/customer-service" active>New Ticket</TopBarButton>
-        <TopBarButton to="/escalated-tickets">Escalated</TopBarButton>
-        <TopBarButton to="/support">Support</TopBarButton>
-
-        
+        <TopBarButton to="/activityManagement">Activity Management</TopBarButton>
+        <TopBarButton to="/schedule" >Schedule</TopBarButton>
+        <TopBarButton to="/performance">Performance</TopBarButton>
+        <TopBarButton to="/support" >Your Requests</TopBarButton>
+        <TopBarButton to="/customer-service" active>Contact Us</TopBarButton>
+        <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
 
       <div className="flex justify-center py-10">

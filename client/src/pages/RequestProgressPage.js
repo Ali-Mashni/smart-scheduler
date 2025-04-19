@@ -41,10 +41,8 @@ export default function RequestProgressPage() {
         <TopBarButton to="/manage-requests">Manage Requests</TopBarButton>
         <TopBarButton to="/faq-management">FAQ Management</TopBarButton>
         <TopBarButton to="/request-progress" active>Request Progress</TopBarButton>
-        <TopBarButton to="/communication-dashboard">Communication</TopBarButton>
-        <TopBarButton to="/customer-service">NewTicket</TopBarButton>
-        <TopBarButton to="/escalated-tickets">Escalated</TopBarButton>
-        
+        <TopBarButton to="/communication-dashboard">Communication</TopBarButton> 
+        <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
 
       <div className="p-8">

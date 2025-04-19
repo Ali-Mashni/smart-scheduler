@@ -49,13 +49,12 @@ export default function StudentSupportPage() {
   return (
     <div className="min-h-screen bg-bgMain text-white">
       <TopBar>
-              <TopBarButton to="/manage-requests" >Manage Requests</TopBarButton>
-              <TopBarButton to="/faq-management">FAQ Management</TopBarButton>
-              <TopBarButton to="/request-progress">Request Progress</TopBarButton>
-              <TopBarButton to="/communication-dashboard">Communication</TopBarButton>
-              <TopBarButton to="/customer-service">New Ticket</TopBarButton>
-              <TopBarButton to="/escalated-tickets">Escalated</TopBarButton>
-              <TopBarButton to="/support"active>Support</TopBarButton>
+              <TopBarButton to="/activityManagement">Activity Management</TopBarButton>
+                <TopBarButton to="/schedule" >Schedule</TopBarButton>
+                <TopBarButton to="/performance">Performance</TopBarButton>
+                <TopBarButton to ="/support" active>Your Requests</TopBarButton>
+                <TopBarButton to ="/customer-service" >Contact Us</TopBarButton>
+                <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
 
       <div className="p-8 flex flex-col md:flex-row gap-6">

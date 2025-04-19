@@ -28,11 +28,11 @@ export default function LoginPage({ setUser }) {
 
       // ⬇️ Navigate based on role
       if (found.role === 'student') {
-        navigate('/student');
+        navigate('/schedule');
       } else if (found.role === 'admin') {
         navigate('/admin');
       } else if (found.role === 'customer-service') {
-        navigate('/customer-service');
+        navigate('/faq-management');
       }
     } else {
       setError('Invalid username or password');

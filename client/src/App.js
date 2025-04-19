@@ -44,7 +44,7 @@ function App() {
             <Route path="/performance" element={<PerformancePage />} />
             <Route path="/support" element={<StudentSupportPage />} />
             <Route path="/customer-service" element={<CustomerServicePage />} />
-            <Route path="/escalated-tickets" element={<EscalatedTicketsPage />} />
+            {/* <Route path="/escalated-tickets" element={<EscalatedTicketsPage />} /> */}
             <Route path="/manage-requests" element={<ManageRequestsPage />} />
             <Route path="/faq-management" element={<FAQManagementPage />} />
             <Route path="/request-progress" element={<RequestProgressPage />} />

@@ -58,10 +58,8 @@ export default function CommunicationDashboardPage() {
         <TopBarButton to="/manage-requests">Manage Requests</TopBarButton>
         <TopBarButton to="/faq-management">FAQ Management</TopBarButton>
         <TopBarButton to="/request-progress">Request Progress</TopBarButton>
-        <TopBarButton to="/communication-dashboard" active>Communication</TopBarButton>
-        <TopBarButton to="/customer-service">New Ticket</TopBarButton>
-                <TopBarButton to="/support">Support</TopBarButton>
-        
+        <TopBarButton to="/communication-dashboard" active>Communication</TopBarButton> 
+        <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>   
       </TopBar>
 
       <div className="p-8">
