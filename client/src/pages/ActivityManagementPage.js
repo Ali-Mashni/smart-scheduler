@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
+import ContactUsModel from '../components/ContactUsModel';
+
 
 export default function ActivityManagementPage() {
   const [action, setAction] = useState('add');
@@ -20,6 +22,8 @@ export default function ActivityManagementPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndexToDelete, setSelectedIndexToDelete] = useState(null);
   const [selectedEditIndex, setSelectedEditIndex] = useState(null);
+    const [isContactUsOpen, setisContactUsOpen] = useState(false);
+  
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -112,6 +116,16 @@ export default function ActivityManagementPage() {
     const subj = subjects.find((s) => s.id === id);
     return subj ? subj.name : '';
   };
+  //Handle creation of ticket
+  // Handle opening settings modal
+  const handleOpenContactUs = () => {
+    setisContactUsOpen(true);
+  };
+
+  // Handle closing settings modal
+  const handleCloseContactUs = () => {
+    setisContactUsOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-bgMain text-white font-sans">
@@ -119,7 +133,13 @@ export default function ActivityManagementPage() {
         <TopBarButton to="/activityManagement" active>Activity Management</TopBarButton>
         <TopBarButton to="/schedule">Schedule</TopBarButton>
         <TopBarButton to="/performance">Performance</TopBarButton>
+        <TopBarButton ><p onClick={handleOpenContactUs}>Contact Us</p></TopBarButton>
+        <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
+      {/* Contact Us Settings Modal */}
+            {isContactUsOpen && (
+              <ContactUsModel onClose={handleCloseContactUs} />
+            )}
 
       <div className="flex gap-6 p-6">
         <aside className="w-1/4 bg-bgCard p-4 rounded-xl shadow-md space-y-4">

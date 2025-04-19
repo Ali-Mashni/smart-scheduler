@@ -2,6 +2,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
+import ContactUsModel from '../components/ContactUsModel';
+
 
 export default function StudentSchedulePage() {
   const [activities, setActivities] = useState([]);
@@ -9,6 +11,8 @@ export default function StudentSchedulePage() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [showSuggested, setShowSuggested] = useState(false);
   const [originalActivities, setOriginalActivities] = useState([]);
+  
+  const [isContactUsOpen, setisContactUsOpen] = useState(false);
   const hourRefs = useRef([]);
   hourRefs.current = [];
 
@@ -155,13 +159,31 @@ export default function StudentSchedulePage() {
     setShowSuggested(true);
   };
 
+
+  //Handle creation of ticket
+  // Handle opening settings modal
+  const handleOpenContactUs = () => {
+    setisContactUsOpen(true);
+  };
+
+  // Handle closing settings modal
+  const handleCloseContactUs = () => {
+    setisContactUsOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-bgMain text-white font-sans">
       <TopBar>
         <TopBarButton to="/activityManagement">Activity Management</TopBarButton>
         <TopBarButton to="/schedule" active>Schedule</TopBarButton>
         <TopBarButton to="/performance">Performance</TopBarButton>
+        <TopBarButton ><p onClick={handleOpenContactUs}>Contact Us</p></TopBarButton>
+        <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
+      {/* Contact Us Settings Modal */}
+      {isContactUsOpen && (
+        <ContactUsModel onClose={handleCloseContactUs} />
+      )}
 
       <main className="flex flex-col md:flex-row gap-6 p-8">
         <section className="flex-1 bg-bgCard p-4 rounded-xl shadow-md overflow-auto max-h-[80vh]">
@@ -181,7 +203,6 @@ export default function StudentSchedulePage() {
                 {displayDate(date)}
               </div>
             ))}
-
             {hours.map((hour, hourIndex) => (
               <React.Fragment key={hour}>
                 <div ref={(el) => hourRefs.current[hourIndex] = el} className="p-2 font-mono text-sm border-t border-gray-600">{hour}</div>
@@ -236,6 +257,9 @@ export default function StudentSchedulePage() {
           </button>
         </section>
       </main>
+      
     </div>
+
+    
   );
 }

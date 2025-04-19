@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
+import ContactUsModel from '../components/ContactUsModel';
+
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, XAxis, YAxis, Bar, Legend } from 'recharts';
 
 export default function PerformancePage() {
   const [activities, setActivities] = useState([]);
   const [today, setToday] = useState(new Date());
+    const [isContactUsOpen, setisContactUsOpen] = useState(false);
+  
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem('activities')) || [];
@@ -51,13 +55,30 @@ export default function PerformancePage() {
     }));
   };
 
+  //Handle creation of ticket
+    // Handle opening settings modal
+    const handleOpenContactUs = () => {
+      setisContactUsOpen(true);
+    };
+  
+    // Handle closing settings modal
+    const handleCloseContactUs = () => {
+      setisContactUsOpen(false);
+    };
+
   return (
     <div className="min-h-screen bg-bgMain text-white font-sans">
       <TopBar>
         <TopBarButton to="/activityManagement">Activity Management</TopBarButton>
         <TopBarButton to="/schedule">Schedule</TopBarButton>
         <TopBarButton to="/performance" active>Performance</TopBarButton>
+        <TopBarButton ><p onClick={handleOpenContactUs}>Contact Us</p></TopBarButton>
+        <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
+      {/* Contact Us Settings Modal */}
+            {isContactUsOpen && (
+              <ContactUsModel onClose={handleCloseContactUs} />
+            )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
         {/* Task Completion Rate Pie */}
