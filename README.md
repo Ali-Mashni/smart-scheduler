@@ -46,78 +46,124 @@ smart-scheduler/
 ---
 ## 📥 Step 1: Clone the Project
 
-Run the following to clone the repository and enter the project folder:
+Run the following commands to clone the repository and set up the frontend:
 
 ```bash
-git clone https://github.com/Ali-Mashni/smart-scheduler.git
-cd smart-scheduler
+git clone https://github.com/Ali-Mashni/smart-scheduler.git  
+cd smart-scheduler/client
 ```
 
 ---
 
 ## 💻 Step 2: Install and Run the Frontend (React)
 
-Install the dependencies and start the development server:
+Install the necessary dependencies and start the development server:
 
 ```bash
-cd client
-npm install
+npm install  
 npm start
 ```
 
-This will start the React app at:  
+This will launch the React app locally at:  
 `http://localhost:3000`
 
-> Make sure this exists in `client/package.json`:
+---
+## 🧪 Usage Instructions and Examples
 
-```json
-"proxy": "http://localhost:5050"
-```
+After running the app (`npm start`), the browser will automatically open to the **Home Page**:
+
+![Home Page](./client/src/assets/Phase1_images/homePage.png) 
+
+From here, users can:
+
+- Explore the content of the home page.
+- Navigate to `Login`, `Signup`, or `FAQ` using the top navigation bar.
+
+### 🔐 Login Behavior
+
+The app uses **hardcoded mock users** for demonstration during Phase 5. Based on login credentials, users will be redirected to different dashboard pages:
+
+| Role               | Username   | Password | Redirected Page  |
+|--------------------|------------|----------|------------------|
+| Admin              | `admin`    | `admin`  | `/admin`         |
+| Student            | `student`  | `123`    | `/schedule`      |
+| Customer Service   | `support`  | `helpme` | `/faq-management`|
+
+To test this:
+1. Click `Login` from the top bar.
+2. Enter any of the above credential pairs.
+3. You will be redirected to the corresponding interface.
+
+Each role has a different UI depending on their responsibilities.
+
+> This login system is mock-only and will be replaced with real backend authentication in future phases.
+
+### 🧭 Role-Based Walkthrough (With Examples)
+
+#### 📝 Signup Page
+
+The **Signup Page** showcases a modern form with a two-panel layout and built-in input validation. It is currently mock-only (non-functional backend) but includes real-time checks for:
+
+- Empty required fields (all fields must be filled)
+- Valid email format
+- Minimum password length (8 characters)
+- Matching password and confirmation fields
+
+![Signup Page](./client/src/assets/Phase1_images/signup.png)
+
+---
+#### 🛠️ Admin Interface
+
+1. Go to the `Login` page.
+2. Use the credentials:
+   - **Username**: `admin`  
+   - **Password**: `admin`
+3. You will be redirected to the **Admin Dashboard** (`/admin`).
+
+Example screenshots:
+
+- ![Admin Dashboard - Overview](./client/src/assets/Phase1_images/admin_dashboard_1.png)
+- ![Admin Dashboard - Details](./client/src/assets/Phase1_images/admin_dashboard_2.png)
 
 ---
 
-## 🔧 Step 3: (Optional) Run the Backend (Node.js + Express)
+#### 🎓 Student Interface
 
-This backend is **optional for this phase**, but ready for future use. Here's how to run it locally if needed:
+1. Return to the `Login` page.
+2. Use the credentials:
+   - **Username**: `student`  
+   - **Password**: `123`
+3. You will be redirected to the **Student Schedule Page** (`/schedule`).
 
-### 🛠 Install Backend Dependencies
+Example screenshots:
 
-```bash
-cd server
-npm install
-```
-
-Then, create a `.env` file in the `server/` folder with the following content: 
-```js
-PORT=5050
-```
-### ▶️ Run the Backend with nodemon
-
-If you do **not** have nodemon installed globally, install it as a **dev dependency**:
-
-```bash
-npm install --save-dev nodemon
-```
-
-Then start the server with:
-
-```bash
-npm run dev
-```
-
-Or, if nodemon is installed globally:
-
-```bash
-nodemon server.js
-```
-
-This will run the backend at:  
-`http://localhost:5050`
+- ![Student Dashboard - Overview](./client/src/assets/Phase1_images/student_dashboard_1.png)
+- ![Student Dashboard - Timetable](./client/src/assets/Phase1_images/student_dashboard_2.png)
 
 ---
 
-## Team Members
+#### 💬 Customer Service Interface
 
-- Ali  
-- Teammate 1  
-- Teammate 2
+1. Go back to the `Login` page again.
+2. Use the credentials:
+   - **Username**: `support`  
+   - **Password**: `helpme`
+3. You will be redirected to the **FAQ Management Page** (`/faq-management`).
+
+Example screenshots:
+
+- ![Support Dashboard - Overview](./client/src/assets/Phase1_images/support_dashboard_1.png)
+- ![Support Dashboard - Requests](./client/src/assets/Phase1_images/support_dashboard_2.png)
+##  Team Members
+
+| Name               | Role / Contribution                                                                 |
+|--------------------|--------------------------------------------------------------------------------------|
+| Ali Mashni         | Project Integration, Home Page, Login & Signup Implementation                       |
+| Khalid Alshehri    | Student Pages Development                                                            |
+| Sultan Alatawi     | Student Pages Development                                                            |
+| Moath Alzahrani    | Admin Pages Development                                                              |
+| Fahad Alathel      | Customer Service Pages Implementation                                                |
+---
+
+
+
