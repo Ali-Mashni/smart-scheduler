@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
@@ -208,10 +209,12 @@ export default function StudentSchedulePage() {
                 })}
               </React.Fragment>
             ))}
+
           </div>
         </section>
 
         {/* Today's Tasks Section */}
+
         <section className={`bg-bgCard p-6 rounded-xl shadow-md w-full ${isMobile ? '' : 'lg:w-[320px]'}`}>
           <h2 className="text-2xl font-bold mb-4">Today's Tasks</h2>
           {todaysTasks.length === 0 ? (
@@ -240,6 +243,7 @@ export default function StudentSchedulePage() {
           >
             {showSuggested ? 'Back to Original Schedule' : 'Suggested Schedule'}
           </button>
+
         </section>
       </main>
     </div>

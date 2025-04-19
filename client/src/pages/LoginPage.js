@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // ⬅️ import useNavigate
 import TextInput from '../components/TextInput.js';
 import PrimaryButton from '../components/PrimaryButton.js';
 import PasswordInput from '../components/PasswordInput';
@@ -16,6 +16,7 @@ const users = [
 export default function LoginPage({ setUser }) {
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // ⬅️ initialize navigate
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -23,7 +24,16 @@ export default function LoginPage({ setUser }) {
       (u) => u.username === form.username && u.password === form.password
     );
     if (found) {
-      setUser(found);
+      // setUser(found);
+
+      // ⬇️ Navigate based on role
+      if (found.role === 'student') {
+        navigate('/student');
+      } else if (found.role === 'admin') {
+        navigate('/admin');
+      } else if (found.role === 'customer-service') {
+        navigate('/customer-service');
+      }
     } else {
       setError('Invalid username or password');
     }
@@ -31,17 +41,14 @@ export default function LoginPage({ setUser }) {
 
   return (
     <div className="min-h-screen bg-bgMain text-white">
-      {/* TopBar */}
       <TopBar>
         <TopBarButton to="/">Home</TopBarButton>
         <TopBarButton to="/login" active>Login</TopBarButton>
         <TopBarButton to="/signup">Signup</TopBarButton>
       </TopBar>
 
-      {/* Login Content */}
       <div className="flex items-center justify-center px-4 min-h-[calc(100vh-64px)]">
         <div className="flex w-full max-w-5xl rounded-2xl overflow-hidden shadow-lg bg-bgCard flex-col md:flex-row">
-          {/* Left side image */}
           <div className="w-full md:w-1/2 relative hidden md:block bg-[#181231]">
             <img
               src={loginImage}
@@ -53,7 +60,6 @@ export default function LoginPage({ setUser }) {
             </div>
           </div>
 
-          {/* Right side form */}
           <div className="w-full md:w-1/2 p-8 md:p-10">
             <h2 className="text-2xl font-bold mb-2">Log in</h2>
             <p className="text-sm text-gray-300 mb-10">Login to your account</p>

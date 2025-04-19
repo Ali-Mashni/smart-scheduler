@@ -168,6 +168,7 @@ export default function PerformancePage() {
               ))}
             </BarChart>
           </ResponsiveContainer>
+
         </div>
       </div>
     </div>

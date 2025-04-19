@@ -17,37 +17,69 @@ export default function SignupPage() {
     confirmPassword: '',
   });
 
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // 'success' | 'error'
 
   const handleSignup = (e) => {
     e.preventDefault();
-
-    if (form.password.length < 8) {
-      setError('Password must be at least 8 characters');
+    setMessage('');
+    setMessageType('');
+  
+    const { firstName, lastName, username, email, password, confirmPassword } = form;
+  
+    if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
+      setMessage('All fields are required.');
+      setMessageType('error');
       return;
     }
-
-    if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
+  
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setMessage('Please enter a valid email address.');
+      setMessageType('error');
       return;
     }
-
+  
+    if (password.length < 8) {
+      setMessage('Password must be at least 8 characters.');
+      setMessageType('error');
+      return;
+    }
+  
+    if (password !== confirmPassword) {
+      setMessage('Passwords do not match.');
+      setMessageType('error');
+      return;
+    }
+  
+    // ✅ Passed all validations
     console.log('Registered user:', form);
-    alert('Account created!');
+    setMessage('Account created successfully!');
+    setMessageType('success');
+  
+    // 🔁 Clear form fields
+    setForm({
+      firstName: '',
+      lastName: '',
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    });
   };
+  
 
   return (
     <div className="min-h-screen bg-bgMain text-white">
-      {/* TopBar outside the main layout */}
       <TopBar>
-          <TopBarButton to="/" >Home</TopBarButton>
-          <TopBarButton to="/login">Login</TopBarButton>
-          <TopBarButton to="/signup" active>Signup</TopBarButton>
-        </TopBar>
+        <TopBarButton to="/">Home</TopBarButton>
+        <TopBarButton to="/login">Login</TopBarButton>
+        <TopBarButton to="/signup" active>Signup</TopBarButton>
+      </TopBar>
 
-      {/* Signup card layout */}
       <div className="flex items-center justify-center px-4 py-10">
         <div className="flex w-full max-w-5xl rounded-2xl overflow-hidden shadow-lg bg-bgCard flex-col md:flex-row">
+          
           {/* Left image */}
           <div className="w-full md:w-1/2 relative hidden md:block bg-[#181231]">
             <img
@@ -66,11 +98,20 @@ export default function SignupPage() {
           {/* Right form */}
           <div className="w-full md:w-1/2 p-8 md:p-10">
             <h2 className="text-2xl font-bold mb-2">Create an account</h2>
-            <p className="text-sm text-gray-300 mb-8">
+            <p className="text-sm text-gray-300 mb-4">
               And Organize Your Academic Journey
             </p>
 
-            {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+            {/* Message display */}
+            {message && (
+              <p
+                className={`text-sm mb-4 ${
+                  messageType === 'error' ? 'text-red-400' : 'text-green-400'
+                }`}
+              >
+                {message}
+              </p>
+            )}
 
             <form onSubmit={handleSignup} className="space-y-6">
               <div className="flex flex-col md:flex-row gap-4">
@@ -103,7 +144,7 @@ export default function SignupPage() {
               <TextInput
                 placeholder="Email"
                 name="email"
-                type="email"
+                type="text" // changed from 'email' to prevent browser popup
                 value={form.email}
                 onChange={(e) =>
                   setForm({ ...form, email: e.target.value })
