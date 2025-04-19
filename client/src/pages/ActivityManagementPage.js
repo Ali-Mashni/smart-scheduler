@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
-import ContactUsModel from '../components/ContactUsModel';
-
 
 export default function ActivityManagementPage() {
   const [action, setAction] = useState('add');
@@ -22,8 +20,6 @@ export default function ActivityManagementPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndexToDelete, setSelectedIndexToDelete] = useState(null);
   const [selectedEditIndex, setSelectedEditIndex] = useState(null);
-    const [isContactUsOpen, setisContactUsOpen] = useState(false);
-  
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -65,6 +61,7 @@ export default function ActivityManagementPage() {
 
     localStorage.setItem('activities', JSON.stringify(updated));
     setActivities(updated);
+
     setActivityName('');
     setActivityType('');
     setAcademicDetail('');
@@ -112,41 +109,25 @@ export default function ActivityManagementPage() {
     setSubjects(updated);
   };
 
-  const getSubjectName = (id) => {
-    const subj = subjects.find((s) => s.id === id);
-    return subj ? subj.name : '';
-  };
-  //Handle creation of ticket
-  // Handle opening settings modal
-  const handleOpenContactUs = () => {
-    setisContactUsOpen(true);
-  };
-
-  // Handle closing settings modal
-  const handleCloseContactUs = () => {
-    setisContactUsOpen(false);
-  };
-
   return (
     <div className="min-h-screen bg-bgMain text-white font-sans">
       <TopBar>
         <TopBarButton to="/activityManagement" active>Activity Management</TopBarButton>
         <TopBarButton to="/schedule">Schedule</TopBarButton>
         <TopBarButton to="/performance">Performance</TopBarButton>
-        <TopBarButton ><p onClick={handleOpenContactUs}>Contact Us</p></TopBarButton>
-        <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
-      {/* Contact Us Settings Modal */}
-            {isContactUsOpen && (
-              <ContactUsModel onClose={handleCloseContactUs} />
-            )}
 
-      <div className="flex gap-6 p-6">
-        <aside className="w-1/4 bg-bgCard p-4 rounded-xl shadow-md space-y-4">
-          <button onClick={() => setAction('add')} className={`w-full text-left py-2 px-3 rounded ${action === 'add' ? 'bg-primaryHover' : 'hover:bg-primaryHover'}`}>Add Activity</button>
-          <button onClick={() => setAction('delete')} className={`w-full text-left py-2 px-3 rounded ${action === 'delete' ? 'bg-primaryHover' : 'hover:bg-primaryHover'}`}>Delete Activity</button>
-          <button onClick={() => setAction('edit')} className={`w-full text-left py-2 px-3 rounded ${action === 'edit' ? 'bg-primaryHover' : 'hover:bg-primaryHover'}`}>Edit Activity</button>
-          <button onClick={() => setAction('courses')} className={`w-full text-left py-2 px-3 rounded ${action === 'courses' ? 'bg-primaryHover' : 'hover:bg-primaryHover'}`}>Courses</button>
+      <div className="flex flex-col lg:flex-row gap-6 p-6">
+        <aside className="lg:w-1/4 bg-bgCard p-4 rounded-xl shadow-md space-y-4">
+          {['add', 'edit', 'delete', 'courses'].map((a) => (
+            <button
+              key={a}
+              onClick={() => setAction(a)}
+              className={`w-full text-left py-2 px-3 rounded capitalize ${action === a ? 'bg-primaryHover text-white' : 'hover:bg-primaryHover text-gray-300'}`}
+            >
+              {a} {a === 'courses' ? '' : 'Activity'}
+            </button>
+          ))}
         </aside>
 
         <section className="flex-1 bg-bgCard p-6 rounded-xl shadow-md">
@@ -163,8 +144,13 @@ export default function ActivityManagementPage() {
                   </li>
                 ))}
               </ul>
-              <div className="flex gap-2">
-                <input value={newCourseName} onChange={(e) => setNewCourseName(e.target.value)} placeholder="New Course Name" className="flex-1 bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2" />
+              <div className="flex gap-2 flex-col sm:flex-row">
+                <input
+                  value={newCourseName}
+                  onChange={(e) => setNewCourseName(e.target.value)}
+                  placeholder="New Course Name"
+                  className="flex-1 bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2"
+                />
                 <button onClick={handleAddSubject} className="bg-primaryHover px-4 py-2 rounded text-white">Add</button>
               </div>
             </div>
@@ -186,28 +172,44 @@ export default function ActivityManagementPage() {
                 </ul>
               )}
 
-              <form className="space-y-4 max-w-xl" onSubmit={handleSubmit}>
-                <div>
-                  <label className="block mb-1 text-sm">Activity Name</label>
-                  <input value={activityName} onChange={(e) => setActivityName(e.target.value)} type="text" className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2 placeholder-gray-400" placeholder="e.g., Gym Session" />
-                </div>
+              <form className="space-y-4 max-w-2xl" onSubmit={handleSubmit}>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block mb-1 text-sm">Activity Name</label>
+                    <input
+                      value={activityName}
+                      onChange={(e) => setActivityName(e.target.value)}
+                      type="text"
+                      className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2"
+                      placeholder="e.g., Gym Session"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block mb-1 text-sm">Activity Type</label>
-                  <select value={activityType} onChange={(e) => setActivityType(e.target.value)} className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2">
-                    <option value="">Select type</option>
-                    <option value="academic">Academic</option>
-                    <option value="exercise">Exercise</option>
-                    <option value="personal">Personal</option>
-                    <option value="other">Other</option>
-                  </select>
+                  <div>
+                    <label className="block mb-1 text-sm">Activity Type</label>
+                    <select
+                      value={activityType}
+                      onChange={(e) => setActivityType(e.target.value)}
+                      className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2"
+                    >
+                      <option value="">Select type</option>
+                      <option value="academic">Academic</option>
+                      <option value="exercise">Exercise</option>
+                      <option value="personal">Personal</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
                 </div>
 
                 {activityType === 'academic' && (
-                  <>
+                  <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block mb-1 text-sm">Select Course</label>
-                      <select value={selectedSubjectId} onChange={(e) => setSelectedSubjectId(e.target.value)} className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2">
+                      <select
+                        value={selectedSubjectId}
+                        onChange={(e) => setSelectedSubjectId(e.target.value)}
+                        className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2"
+                      >
                         <option value="">Select Course</option>
                         {subjects.map((s) => (
                           <option key={s.id} value={s.id}>{s.name}</option>
@@ -216,7 +218,11 @@ export default function ActivityManagementPage() {
                     </div>
                     <div>
                       <label className="block mb-1 text-sm">Academic Detail</label>
-                      <select value={academicDetail} onChange={(e) => setAcademicDetail(e.target.value)} className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2">
+                      <select
+                        value={academicDetail}
+                        onChange={(e) => setAcademicDetail(e.target.value)}
+                        className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2"
+                      >
                         <option value="">Select</option>
                         <option value="class">Class</option>
                         <option value="major">Major</option>
@@ -227,14 +233,14 @@ export default function ActivityManagementPage() {
                         <option value="study">Study</option>
                       </select>
                     </div>
-                  </>
+                  </div>
                 )}
 
                 <div className="mb-4">
                   <label className="block mb-1 text-sm">Task Type</label>
                   <div className="flex gap-4">
-                    <button type="button" onClick={() => setIsPermanent(true)} className={`px-4 py-2 rounded-md border ${isPermanent ? 'bg-primaryHover text-white' : 'bg-[#303043] text-gray-300'} transition`}>Permanent</button>
-                    <button type="button" onClick={() => setIsPermanent(false)} className={`px-4 py-2 rounded-md border ${!isPermanent ? 'bg-primaryHover text-white' : 'bg-[#303043] text-gray-300'} transition`}>Temporary</button>
+                    <button type="button" onClick={() => setIsPermanent(true)} className={`px-4 py-2 rounded-md border ${isPermanent ? 'bg-primaryHover text-white' : 'bg-[#303043] text-gray-300'}`}>Permanent</button>
+                    <button type="button" onClick={() => setIsPermanent(false)} className={`px-4 py-2 rounded-md border ${!isPermanent ? 'bg-primaryHover text-white' : 'bg-[#303043] text-gray-300'}`}>Temporary</button>
                   </div>
                 </div>
 
@@ -262,14 +268,15 @@ export default function ActivityManagementPage() {
                   </div>
                 )}
 
-                <div>
-                  <label className="block mb-1 text-sm">Start Time</label>
-                  <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2" />
-                </div>
-
-                <div>
-                  <label className="block mb-1 text-sm">End Time</label>
-                  <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2" />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block mb-1 text-sm">Start Time</label>
+                    <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2" />
+                  </div>
+                  <div>
+                    <label className="block mb-1 text-sm">End Time</label>
+                    <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2" />
+                  </div>
                 </div>
 
                 <div className="pt-4">
@@ -285,7 +292,11 @@ export default function ActivityManagementPage() {
             <div>
               <ul className="space-y-3">
                 {activities.map((activity, idx) => (
-                  <li key={idx} onClick={() => setSelectedIndexToDelete(idx)} className={`p-3 rounded-md cursor-pointer ${selectedIndexToDelete === idx ? 'bg-[#7345df]' : 'bg-[#303043]'} hover:bg-primaryHover`}>
+                  <li
+                    key={idx}
+                    onClick={() => setSelectedIndexToDelete(idx)}
+                    className={`p-3 rounded-md cursor-pointer ${selectedIndexToDelete === idx ? 'bg-[#7345df]' : 'bg-[#303043]'} hover:bg-primaryHover`}
+                  >
                     {activity.activityName} ({activity.activityType})
                   </li>
                 ))}
@@ -300,5 +311,5 @@ export default function ActivityManagementPage() {
         </section>
       </div>
     </div>
-  );  
+  );
 }
