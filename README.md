@@ -161,7 +161,7 @@ Example screenshots:
 | Ali Mashni         | Project Integration, Home Page, Login & Signup Implementation                       |
 | Khalid Alshehri    | Student Pages Development                                                            |
 | Sultan Alatawi     | Student Pages Development                                                            |
-| Moath Alzahrani    | Admin Pages Development                                                              |
+| Haitham Alzahrani    | Admin Pages Development                                                              |
 | Fahad Alathel      | Customer Service Pages Implementation                                                |
 ---
 
