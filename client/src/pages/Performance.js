@@ -131,10 +131,7 @@ export default function PerformancePage() {
               <span className="inline-block w-4 h-4 rounded-full bg-[#7A73D1]"></span>
               Completed
             </div>
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-4 h-4 rounded-full bg-[#2a2a3c]"></span>
-              Uncompleted
-            </div>
+            
           </div>
         </div>
 
