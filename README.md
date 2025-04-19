@@ -118,6 +118,9 @@ This will run the backend at:
 
 ## Team Members
 
-- Ali  
-- Teammate 1  
-- Teammate 2
+- SULTAN ALATAWI
+- FAHAD ALATHEL
+- KHALID ALSHEHRI
+- HAITHAM ALZAHRANI
+- ALI MASHNI
+  
