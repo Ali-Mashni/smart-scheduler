@@ -28,15 +28,18 @@ function App() {
           <Routes>
             {/* Default redirect to login */}
             <Route path="/" element={<HomePage />} />
+            
             {/* Auth pages */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            
             {/* Admin Dashboard */}
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/FAQ" element={<FAQ />} />
+            
 
             {/* Other pages */}
             <Route path="/schedule" element={<StudentSchedulePage />} />
+            <Route path="/FAQ" element={<FAQ />} />
             <Route path="/activityManagement" element={<ActivityManagementPage />} />
             <Route path="/performance" element={<PerformancePage />} />
             <Route path="/support" element={<StudentSupportPage />} />
