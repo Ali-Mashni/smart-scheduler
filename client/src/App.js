@@ -1,11 +1,7 @@
 // client/src/App.js
+
 import React, { useState, useEffect } from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate
-} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -34,7 +30,6 @@ import { FAQProvider } from './context/FAQContext';
 export default function App() {
   const [user, setUser] = useState(null);
 
-  // On load, restore user from stored JWT
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -42,7 +37,6 @@ export default function App() {
         const { role } = JSON.parse(atob(token.split('.')[1]));
         setUser({ role });
       } catch {
-        // malformed token
         localStorage.removeItem('token');
       }
     }
@@ -59,7 +53,7 @@ export default function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/logout" element={<LogoutPage setUser={setUser} />} />
 
-            {/* Student area */}
+            {/* Student Area */}
             <Route
               path="/schedule"
               element={
@@ -71,7 +65,7 @@ export default function App() {
             <Route path="/activityManagement" element={<ActivityManagementPage />} />
             <Route path="/performance" element={<PerformancePage />} />
 
-            {/* Admin area */}
+            {/* Admin Area */}
             <Route
               path="/admin"
               element={
@@ -81,17 +75,19 @@ export default function App() {
               }
             />
 
-            {/* Support-agent area */}
-            <Route path="/customer-service" element={<CustomerServicePage />} />
+            {/* Support-Agent Area */}
             <Route
-  path="/support"
-  element={
-    (user?.role === 'student' || user?.role === 'support')
-      ? <StudentSupportPage />
-      : <Navigate to="/login" replace />
-  }
-/>
-
+              path="/customer-service"
+              element={<CustomerServicePage />}
+            />
+            <Route
+              path="/support"
+              element={
+                (user?.role === 'student' || user?.role === 'support')
+                  ? <StudentSupportPage />
+                  : <Navigate to="/login" replace />
+              }
+            />
             <Route
               path="/faq-management"
               element={
@@ -128,7 +124,7 @@ export default function App() {
             {/* Public FAQ */}
             <Route path="/FAQ" element={<FAQPage />} />
 
-            {/* Catch-all */}
+            {/* Catch-All */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
