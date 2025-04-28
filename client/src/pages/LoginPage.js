@@ -1,41 +1,60 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // ⬅️ import useNavigate
+// client/src/pages/LoginPage.js
+
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import TextInput from '../components/TextInput.js';
 import PrimaryButton from '../components/PrimaryButton.js';
-import PasswordInput from '../components/PasswordInput';
+import PasswordInput from '../components/PasswordInput.js';
 import loginImage from '../assets/Log_in_image.png';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
-
-const users = [
-  { username: 'student', password: '123', role: 'student' },
-  { username: 'admin', password: 'admin', role: 'admin' },
-  { username: 'support', password: 'helpme', role: 'customer-service' },
-];
+import api from '../api';
 
 export default function LoginPage({ setUser }) {
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // ⬅️ initialize navigate
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  // If already logged in, redirect
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const { role } = JSON.parse(atob(token.split('.')[1]));
+      setUser({ role });
+      if (role === 'student') return navigate('/schedule');
+      if (role === 'admin')   return navigate('/admin');
+      if (role === 'support') return navigate('/faq-management');
+    }
+  }, [navigate, setUser]);
+
+  const handleLogin = async e => {
     e.preventDefault();
-    const found = users.find(
-      (u) => u.username === form.username && u.password === form.password
-    );
-    if (found) {
-      // setUser(found);
+    setError('');
 
-      // ⬇️ Navigate based on role
-      if (found.role === 'student') {
-        navigate('/schedule');
-      } else if (found.role === 'admin') {
-        navigate('/admin');
-      } else if (found.role === 'customer-service') {
-        navigate('/faq-management');
-      }
-    } else {
-      setError('Invalid username or password');
+    try {
+      const res = await api.post('/api/auth/login', {
+        email: form.email,
+        password: form.password
+      });
+
+      const { token } = res.data; 
+      localStorage.setItem('token', token);
+
+      // Decode payload to get role
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const { role } = payload;
+      setUser({ role });
+
+      // Redirect based on role
+      if (role === 'student') navigate('/schedule');
+      else if (role === 'admin') navigate('/admin');
+      else if (role === 'support') navigate('/faq-management');
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.data?.message ||
+        'Login failed. Please check your credentials.'
+      );
     }
   };
 
@@ -68,16 +87,17 @@ export default function LoginPage({ setUser }) {
 
             <form onSubmit={handleLogin} className="space-y-6">
               <TextInput
-                placeholder="Username"
-                name="username"
-                value={form.username}
-                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                placeholder="Email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={e => setForm({ ...form, email: e.target.value })}
               />
               <PasswordInput
                 placeholder="Password"
                 name="password"
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                onChange={e => setForm({ ...form, password: e.target.value })}
               />
               <PrimaryButton type="submit">Log In</PrimaryButton>
             </form>

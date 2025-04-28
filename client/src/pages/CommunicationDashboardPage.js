@@ -1,56 +1,105 @@
-// src/pages/CommunicationDashboardPage.js
-import React, { useContext, useState, useEffect } from 'react';
+// client/src/pages/CommunicationDashboardPage.js
+
+import React, { useState, useEffect } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
 import PrimaryButton from '../components/PrimaryButton';
 import Toast from '../components/Toast';
-import { TicketContext } from '../context/TicketContext';
 import TicketList from '../components/TicketList';
 import ConversationMessages from '../components/ConversationMessages';
+import MessageTextarea from '../components/MessageTextarea';
+import api from '../api';
 
 export default function CommunicationDashboardPage() {
-  const { tickets, addMessageToTicket, updateTicketStatus } = useContext(TicketContext);
-
-  const activeConversations = tickets.filter(ticket => ticket.status === 'In Progress');
-  const [selectedConvId, setSelectedConvId] = useState(activeConversations[0]?.id);
+  const [tickets, setTickets] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [conversation, setConversation] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [toast, setToast] = useState(null);
 
-  const selectedConversation = activeConversations.find(ticket => ticket.id === selectedConvId);
-
+  // Load tickets once on mount
   useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(timer);
-    }
+    (async () => {
+      try {
+        const res = await api.get('/api/support/requests');
+        const all = res.data.data.map(t => ({
+          ...t,
+          id: t._id,
+          subject: t.title,
+          message: t.description,
+          name: `${t.user.firstName} ${t.user.lastName}`
+        }));
+        const active = all.filter(t => t.status === 'In Progress');
+        setTickets(active);
+        if (active.length) setSelectedId(active[0].id);
+      } catch (err) {
+        console.error('Failed to fetch tickets:', err);
+      }
+    })();
+  }, []);
+
+  // Fetch conversation once per ticket selection
+  useEffect(() => {
+    if (!selectedId) return;
+    const ticket = tickets.find(t => t.id === selectedId);
+    if (!ticket) return;
+
+    (async () => {
+      try {
+      
+        const res = await api.get(`/api/support/messages/${selectedId}`);
+        const msgs = res.data.data.map(m => ({
+          sender: m.sender.role === 'support' ? 'Agent' : 'Student',
+          text: m.message
+        }));
+        setConversation(msgs);
+      } catch (err) {
+        console.error('Failed to load conversation:', err);
+      }
+    })();
+  }, [selectedId]);
+
+  // Auto-clear toast
+  useEffect(() => {
+    if (!toast) return;
+    const tm = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(tm);
   }, [toast]);
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedConversation) return;
-    addMessageToTicket(selectedConvId, newMessage.trim());
-    setNewMessage('');
-    setToast({ message: 'Message sent!', type: 'success' });
+  // Send agent reply
+  const handleSend = async () => {
+    if (!newMessage.trim()) return;
+    try {
+      await api.post('/api/support/messages', {
+        requestId: selectedId,
+        message: newMessage.trim()
+      });
+      setConversation(c => [
+        ...c,
+        { sender: 'Agent', text: newMessage.trim() }
+      ]);
+      setNewMessage('');
+      setToast({ message: 'Sent!', type: 'success' });
+    } catch (err) {
+      console.error('Send failed:', err);
+      setToast({ message: 'Failed to send.', type: 'error' });
+    }
   };
 
-  const handleCloseConversation = () => {
-    updateTicketStatus(selectedConvId, 'Resolved');
-    setToast({ message: 'Conversation marked as resolved.', type: 'success' });
+  // Close conversation button
+  const handleClose = async () => {
+    try {
+      await api.put(`/api/support/requests/${selectedId}/status`, { status: 'Resolved' });
+      setTickets(prev => prev.filter(t => t.id !== selectedId));
+      setSelectedId(null);
+      setConversation([]);
+      setToast({ message: 'Conversation closed!', type: 'success' });
+    } catch {
+      setToast({ message: 'Failed to close.', type: 'error' });
+    }
   };
 
-  const buildConversation = () => {
-    if (!selectedConversation) return [];
-    const { message, messages = [] } = selectedConversation;
-
-    // Avoid duplication if the first message is already added in the thread
-    const hasInitial =
-      messages.length > 0 &&
-      messages[0].text === message &&
-      messages[0].sender === 'Student';
-
-    return hasInitial
-      ? messages
-      : [{ sender: 'Student', text: message }, ...messages];
-  };
+  const selected = tickets.find(t => t.id === selectedId) || {};
 
   return (
     <div className="min-h-screen bg-bgMain text-white">
@@ -58,75 +107,67 @@ export default function CommunicationDashboardPage() {
         <TopBarButton to="/manage-requests">Manage Requests</TopBarButton>
         <TopBarButton to="/faq-management">FAQ Management</TopBarButton>
         <TopBarButton to="/request-progress">Request Progress</TopBarButton>
-        <TopBarButton to="/communication-dashboard" active>Communication</TopBarButton> 
-        <TopBarButton to="/login"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>   
+        <TopBarButton to="/communication-dashboard" active>
+          Communication
+        </TopBarButton>
+        <TopBarButton to="/logout">
+          <p className="text-red-500 hover:text-red-600">Logout</p>
+        </TopBarButton>
       </TopBar>
 
       <div className="p-8">
         <h2 className="text-2xl font-bold mb-4">Communication Dashboard</h2>
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Sidebar */}
+          {/* Ticket list */}
           <div className="w-full md:w-1/3">
             <h3 className="text-xl mb-2">Conversations</h3>
-            {activeConversations.length === 0 ? (
-              <>
-                No active conversations.
-                <br />
-                (Tickets must be marked "In Progress" in Manage Requests to appear here.)
-              </>
-            ) : (
-              <TicketList
-                tickets={activeConversations}
-                selectedId={selectedConvId}
-                onSelect={setSelectedConvId}
-                renderItem={(ticket) => (
-                  <>
-                    <p className="font-semibold">{ticket.name} - {ticket.subject}</p>
-                    <p className="text-sm text-gray-400">{ticket.status}</p>
-                  </>
-                )}
-              />
-            )}
+            <TicketList
+              tickets={tickets}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              renderItem={t => (
+                <>
+                  <p className="font-semibold">{t.name} - {t.subject}</p>
+                  <p className="text-sm text-gray-400">{t.status}</p>
+                </>
+              )}
+            />
           </div>
 
-          {/* Main Panel */}
-          <div className="w-full md:w-2/3">
-            {selectedConversation ? (
+          {/* Chat pane */}
+          <div className="w-full md:w-2/3 bg-bgCard p-6 rounded">
+            {selectedId ? (
               <>
-                <h3 className="text-xl font-bold mb-2">
-                  Conversation with {selectedConversation.name}
-                </h3>
-                <ConversationMessages messages={buildConversation()} />
-                <textarea
+                <h3 className="text-xl font-bold mb-2">Chat with {selected.name}</h3>
+                <ConversationMessages
+                  messages={conversation}
+                  currentUser="Agent"
+                />
+                <MessageTextarea
+                  name="message"
+                  placeholder="Type your reply…"
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message here..."
-                  className="w-full p-2 rounded bg-inputBg border border-inputBorder"
-                  rows="3"
+                  onChange={e => setNewMessage(e.target.value)}
                 />
                 <div className="flex gap-4 mt-2">
-                  <PrimaryButton onClick={handleSendMessage}>
-                    Send Message
-                  </PrimaryButton>
-                  <PrimaryButton onClick={handleCloseConversation}>
+                  <PrimaryButton onClick={handleSend}>Send Message</PrimaryButton>
+                  <PrimaryButton
+                    onClick={handleClose}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
                     Close Conversation
                   </PrimaryButton>
                 </div>
               </>
             ) : (
-              <p className="text-gray-400">No conversation selected.</p>
+              <p className="text-gray-400">Select a conversation.</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Toast */}
       {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
     </div>
   );
