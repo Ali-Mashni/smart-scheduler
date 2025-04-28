@@ -1,3 +1,5 @@
+// controllers/supportFaqController.js
+
 const SupportFAQ = require('../models/SupportFAQ');
 
 // Create a new FAQ
@@ -6,17 +8,16 @@ exports.createFAQ = async (req, res) => {
 
   try {
     const faq = await SupportFAQ.create({ question, answer });
-
     res.status(201).json({
       success: true,
       message: 'FAQ created successfully.',
-      data: faq
+      data: faq,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({
       success: false,
-      message: 'Internal server error while creating FAQ.'
+      message: 'Server error while creating FAQ.',
     });
   }
 };
@@ -25,18 +26,17 @@ exports.createFAQ = async (req, res) => {
 exports.getAllFAQs = async (req, res) => {
   try {
     const faqs = await SupportFAQ.find();
-
     res.status(200).json({
       success: true,
       count: faqs.length,
       message: 'FAQs fetched successfully.',
-      data: faqs
+      data: faqs,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({
       success: false,
-      message: 'Internal server error while fetching FAQs.'
+      message: 'Server error while fetching FAQs.',
     });
   }
 };
@@ -56,20 +56,20 @@ exports.updateFAQ = async (req, res) => {
     if (!faq) {
       return res.status(404).json({
         success: false,
-        message: 'FAQ not found.'
+        message: 'FAQ not found.',
       });
     }
 
     res.status(200).json({
       success: true,
       message: 'FAQ updated successfully.',
-      data: faq
+      data: faq,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({
       success: false,
-      message: 'Internal server error while updating FAQ.'
+      message: 'Server error while updating FAQ.',
     });
   }
 };
@@ -84,19 +84,19 @@ exports.deleteFAQ = async (req, res) => {
     if (!faq) {
       return res.status(404).json({
         success: false,
-        message: 'FAQ not found.'
+        message: 'FAQ not found.',
       });
     }
 
     res.status(200).json({
       success: true,
-      message: 'FAQ deleted successfully.'
+      message: 'FAQ deleted successfully.',
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({
       success: false,
-      message: 'Internal server error while deleting FAQ.'
+      message: 'Server error while deleting FAQ.',
     });
   }
 };

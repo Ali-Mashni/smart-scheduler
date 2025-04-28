@@ -19,7 +19,6 @@ export default function FAQManagementPage() {
   const [faqEdit, setFaqEdit] = useState({ question: '', answer: '' });
   const [toast, setToast] = useState(null);
 
-  // Load FAQs on mount
   useEffect(() => {
     (async () => {
       try {
@@ -33,7 +32,6 @@ export default function FAQManagementPage() {
     })();
   }, []);
 
-  // Auto-dismiss toast
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 3000);

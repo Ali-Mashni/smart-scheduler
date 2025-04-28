@@ -23,11 +23,10 @@ export default function ManageRequestsPage() {
         const data = res.data.data.map(t => ({
           ...t,
           id: t._id,
-          // map backend → frontend fields
           subject: t.title,
           message: t.description,
-          name: `${t.user.firstName} ${t.user.lastName}`,   // populated user
-          email: t.user.email
+          name: `${t.user.firstName} ${t.user.lastName}`,
+          email: t.user.email,
         }));
         setTickets(data);
         if (data.length && !selectedTicketId) {
@@ -49,6 +48,7 @@ export default function ManageRequestsPage() {
   const availableTickets = tickets.filter(
     t => t.status !== 'Escalated' && t.status !== 'Dismissed'
   );
+
   const selectedTicket = availableTickets.find(t => t.id === selectedTicketId);
 
   const handleTicketAction = async (ticketId, action) => {

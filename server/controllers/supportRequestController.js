@@ -6,20 +6,19 @@ const SupportMessage = require('../models/SupportMessage');
 // Create a new support request
 exports.createRequest = async (req, res) => {
   const { title, description } = req.body;
-  
+
   try {
     const newRequest = await SupportRequest.create({
-      user: req.user.id, // student ID from token
+      user: req.user.id,
       title,
       description,
-      status: 'Pending'
+      status: 'Pending',
     });
 
-    // Also create the first message automatically
     await SupportMessage.create({
       request: newRequest._id,
       sender: req.user.id,
-      message: description
+      message: description,
     });
 
     res.status(201).json({ success: true, message: 'Support request created successfully.', data: newRequest });
@@ -28,7 +27,7 @@ exports.createRequest = async (req, res) => {
   }
 };
 
-// Get all requests (agent or student)
+// Get all support requests
 exports.getRequests = async (req, res) => {
   try {
     const requests = await SupportRequest.find().populate('user assignedAgent');
@@ -38,10 +37,10 @@ exports.getRequests = async (req, res) => {
   }
 };
 
-// Update request status (only agent)
+// Update support request status
 exports.updateRequestStatus = async (req, res) => {
   const { status } = req.body;
-  
+
   try {
     const updatedRequest = await SupportRequest.findByIdAndUpdate(
       req.params.id,

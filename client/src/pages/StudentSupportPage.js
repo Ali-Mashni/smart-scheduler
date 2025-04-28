@@ -16,7 +16,6 @@ export default function StudentSupportPage() {
   const [newMessage, setNewMessage] = useState('');
   const [toast, setToast] = useState(null);
 
-  // **Load tickets once on mount** (no selectedId dependency)
   useEffect(() => {
     (async () => {
       try {
@@ -25,7 +24,7 @@ export default function StudentSupportPage() {
           ...t,
           id: t._id,
           subject: t.title,
-          message: t.description
+          message: t.description,
         }));
         const inProg = all.filter(t => t.status === 'In Progress');
         setTickets(inProg);
@@ -34,9 +33,8 @@ export default function StudentSupportPage() {
         console.error('Failed to fetch tickets:', err);
       }
     })();
-  }, []); // ← only on mount
+  }, []);
 
-  // **Fetch conversation once per selectedId** (no tickets dependency)
   useEffect(() => {
     if (!selectedId) return;
     const ticket = tickets.find(t => t.id === selectedId);
@@ -44,38 +42,34 @@ export default function StudentSupportPage() {
 
     (async () => {
       try {
-    
-        // replies from DB
         const res = await api.get(`/api/support/messages/${selectedId}`);
         const msgs = res.data.data.map(m => ({
           sender: m.sender.role === 'support' ? 'Agent' : 'Student',
-          text: m.message
+          text: m.message,
         }));
         setConversation(msgs);
       } catch (err) {
         console.error('Failed to load conversation:', err);
       }
     })();
-  }, [selectedId]); // ← only when ticket changes
+  }, [selectedId]);
 
-  // Auto–dismiss toasts
   useEffect(() => {
     if (!toast) return;
     const tm = setTimeout(() => setToast(null), 3000);
     return () => clearTimeout(tm);
   }, [toast]);
 
-  // Send student reply
   const handleSend = async () => {
     if (!newMessage.trim()) return;
     try {
       await api.post('/api/support/messages', {
         requestId: selectedId,
-        message: newMessage.trim()
+        message: newMessage.trim(),
       });
       setConversation(c => [
         ...c,
-        { sender: 'Student', text: newMessage.trim() }
+        { sender: 'Student', text: newMessage.trim() },
       ]);
       setNewMessage('');
       setToast({ message: 'Message sent!', type: 'success' });
@@ -155,7 +149,11 @@ export default function StudentSupportPage() {
       </div>
 
       {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );
