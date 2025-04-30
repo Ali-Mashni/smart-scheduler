@@ -37,6 +37,10 @@ export default function StudentSchedulePage() {
   };
 
   const formatDate = (date) => {
+    if (!(date instanceof Date) || isNaN(date)) {
+      console.warn("Invalid date passed to formatDate:", date);
+      return "";
+    }
     const offset = date.getTimezoneOffset();
     const corrected = new Date(date.getTime() - offset * 60 * 1000);
     return corrected.toISOString().slice(0, 10);
@@ -62,8 +66,8 @@ export default function StudentSchedulePage() {
         a.selectedDays?.includes(
           new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long' })
         );
-      const isTemporary =
-        !a.isPermanent && formatDate(new Date(a.selectedDate)) === dateStr;
+        const isTemporary = !a.isPermanent && a.selectedDate && formatDate(new Date(a.selectedDate)) === dateStr;
+
       const [startH] = a.startTime.split(':').map(Number);
       const [endH] = a.endTime.split(':').map(Number);
       const currentH = parseInt(hour.split(':')[0]);

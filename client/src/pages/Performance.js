@@ -19,8 +19,13 @@ export default function PerformancePage() {
     setActivities(stored);
   }, []);
 
-  const formatDate = (date) => date.toISOString().split('T')[0];
-
+  const formatDate = (date) => {
+    if (!(date instanceof Date) || isNaN(date)) {
+      console.warn("Invalid date passed to formatDate:", date);
+      return "";
+    }
+    return date.toISOString().split('T')[0];
+  };
   const getWeekDates = () => {
     const now = new Date();
     now.setDate(now.getDate() + weekOffset * 7);
@@ -37,7 +42,10 @@ export default function PerformancePage() {
   const todayStr = formatDate(today);
 
   const upcomingTasks = activities
-    .filter(a => a.selectedDate && new Date(a.selectedDate) >= today)
+  .filter(a => {
+    const d = new Date(a.selectedDate);
+    return a.selectedDate && !isNaN(d) && d >= today;
+  })    
     .sort((a, b) => new Date(a.selectedDate) - new Date(b.selectedDate))
     .slice(0, 5);
 
