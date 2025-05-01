@@ -6,7 +6,7 @@ import PasswordInput from '../components/PasswordInput';
 import signupImage from '../assets/SignUp_image.png';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
-
+import { useNavigate } from 'react-router-dom'; 
 export default function SignupPage() {
   const [form, setForm] = useState({
     firstName: '',
@@ -20,44 +20,55 @@ export default function SignupPage() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success' | 'error'
 
-  const handleSignup = (e) => {
-    e.preventDefault();
-    setMessage('');
-    setMessageType('');
-  
-    const { firstName, lastName, username, email, password, confirmPassword } = form;
-  
-    if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
-      setMessage('All fields are required.');
-      setMessageType('error');
-      return;
+  const navigate = useNavigate();
+
+const handleSignup = async (e) => {
+  e.preventDefault();
+  setMessage('');
+  setMessageType('');
+
+  const { firstName, lastName, username, email, password, confirmPassword } = form;
+
+  if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
+    setMessage('All fields are required.');
+    setMessageType('error');
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    setMessage('Please enter a valid email address.');
+    setMessageType('error');
+    return;
+  }
+
+  if (password.length < 8) {
+    setMessage('Password must be at least 8 characters.');
+    setMessageType('error');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    setMessage('Passwords do not match.');
+    setMessageType('error');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, role: 'student' }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || 'Signup failed.');
     }
-  
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setMessage('Please enter a valid email address.');
-      setMessageType('error');
-      return;
-    }
-  
-    if (password.length < 8) {
-      setMessage('Password must be at least 8 characters.');
-      setMessageType('error');
-      return;
-    }
-  
-    if (password !== confirmPassword) {
-      setMessage('Passwords do not match.');
-      setMessageType('error');
-      return;
-    }
-  
-    // ✅ Passed all validations
-    console.log('Registered user:', form);
-    setMessage('Account created successfully!');
+
+    setMessage('Account created successfully! Redirecting to login...');
     setMessageType('success');
-  
-    // 🔁 Clear form fields
+
     setForm({
       firstName: '',
       lastName: '',
@@ -66,7 +77,15 @@ export default function SignupPage() {
       password: '',
       confirmPassword: '',
     });
-  };
+
+    setTimeout(() => {
+      navigate('/login');
+    }, 2000);
+  } catch (err) {
+    setMessage(err.message);
+    setMessageType('error');
+  }
+};
   
 
   return (

@@ -1,9 +1,8 @@
-
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
 import ContactUsModel from '../components/ContactUsModel';
-
+import UserContext from '../context/UserContext';
 
 export default function StudentSchedulePage() {
   const [activities, setActivities] = useState([]);
@@ -15,7 +14,7 @@ export default function StudentSchedulePage() {
   const hourRefs = useRef([]);
   hourRefs.current = [];
   const [isContactUsOpen, setisContactUsOpen] = useState(false);
-
+  const user = useContext(UserContext);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -37,13 +36,9 @@ export default function StudentSchedulePage() {
   };
 
   const formatDate = (date) => {
-    if (!(date instanceof Date) || isNaN(date)) {
-      console.warn("Invalid date passed to formatDate:", date);
-      return "";
-    }
+    if (!(date instanceof Date) || isNaN(date)) return "";
     const offset = date.getTimezoneOffset();
-    const corrected = new Date(date.getTime() - offset * 60 * 1000);
-    return corrected.toISOString().slice(0, 10);
+    return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 10);
   };
 
   const displayDate = (date) =>
@@ -53,21 +48,15 @@ export default function StudentSchedulePage() {
       day: 'numeric',
     });
 
-  const weekDates = getStartOfWeek();
-  const singleDay = [weekDates[new Date().getDay()]];
-  const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-  const dateRange = isMobile ? singleDay : weekDates;
-
   const getActivityForSlot = (dateStr, hour) => {
-    return activities.find((a) => {
+    return Array.isArray(activities) && activities.find((a) => {
       if (!a.startTime || !a.endTime) return false;
       const isPermanent =
         a.isPermanent &&
         a.selectedDays?.includes(
           new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long' })
         );
-        const isTemporary = !a.isPermanent && a.selectedDate && formatDate(new Date(a.selectedDate)) === dateStr;
-
+      const isTemporary = !a.isPermanent && a.selectedDate && formatDate(new Date(a.selectedDate)) === dateStr;
       const [startH] = a.startTime.split(':').map(Number);
       const [endH] = a.endTime.split(':').map(Number);
       const currentH = parseInt(hour.split(':')[0]);
@@ -86,28 +75,53 @@ export default function StudentSchedulePage() {
   };
 
   useEffect(() => {
-    const todayDate = formatDate(new Date());
-    const stored = JSON.parse(localStorage.getItem("activities")) || [];
-    setActivities(stored);
-    setOriginalActivities(stored);
-    const weekday = new Date(todayDate).toLocaleDateString('en-US', { weekday: 'long' });
-    const todayTasks = stored.filter((a) => {
-      if (a.isPermanent) return a.selectedDays.includes(weekday);
-      return formatDate(new Date(a.selectedDate)) === todayDate;
-    });
-    setTodaysTasks(todayTasks);
-  }, [weekOffset]);
+    if (!user?.id) return;
+
+    const fetchActivities = async () => {
+      try {
+        const res = await fetch('/api/student/activities', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch');
+        const json = await res.json();
+        const data = Array.isArray(json.data) ? json.data : [];
+
+        setActivities(data);
+        setOriginalActivities(data);
+        console.log(data)
+        const todayDate = formatDate(new Date());
+        const weekday = new Date(todayDate).toLocaleDateString('en-US', { weekday: 'long' });
+
+        const todayTasks = data.filter((a) =>
+          a.isPermanent ? a.selectedDays.includes(weekday) : formatDate(new Date(a.selectedDate)) === todayDate
+        );
+        setTodaysTasks(todayTasks);
+      } catch (err) {
+        console.error('Failed to fetch activities:', err);
+        setActivities([]);
+        setTodaysTasks([]);
+      }
+    };
+
+    fetchActivities();
+  }, [weekOffset, user]);
 
   const toggleTaskComplete = (index) => {
     const updated = [...todaysTasks];
     updated[index].completed = !updated[index].completed;
     const updatedAll = activities.map((a) => {
-      const match = updated.find((t) => t.activityName === a.activityName && t.startTime === a.startTime && t.endTime === a.endTime);
+      const match = updated.find(
+        (t) => t.activityName === a.activityName && t.startTime === a.startTime && t.endTime === a.endTime
+      );
       return match ? { ...a, completed: match.completed } : a;
     });
     setTodaysTasks(updated);
     setActivities(updatedAll);
-    localStorage.setItem("activities", JSON.stringify(updatedAll));
+    // Here: you can optionally send a PATCH request to update backend.
   };
 
   const toggleSuggestedSchedule = () => {
@@ -117,7 +131,9 @@ export default function StudentSchedulePage() {
       return;
     }
     const suggested = [...originalActivities];
-    const exams = suggested.filter((a) => a.activityType === 'academic' && ['midterm', 'final', 'quiz'].includes(a.academicDetail));
+    const exams = suggested.filter((a) =>
+      a.activityType === 'academic' && ['midterm', 'final', 'quiz'].includes(a.academicDetail)
+    );
     exams.forEach((exam) => {
       const examDate = new Date(exam.selectedDate);
       for (let i = 1; i <= 5; i++) {
@@ -142,16 +158,11 @@ export default function StudentSchedulePage() {
     setActivities(suggested);
     setShowSuggested(true);
   };
-  //Handle creation of ticket
-  // Handle opening settings modal
-  const handleOpenContactUs = () => {
-    setisContactUsOpen(true);
-  };
 
-  // Handle closing settings modal
-  const handleCloseContactUs = () => {
-    setisContactUsOpen(false);
-  };
+  const weekDates = getStartOfWeek();
+  const singleDay = [weekDates[new Date().getDay()]];
+  const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+  const dateRange = isMobile ? singleDay : weekDates;
 
   return (
     <div className="min-h-screen bg-bgMain text-white font-sans">
@@ -159,39 +170,33 @@ export default function StudentSchedulePage() {
         <TopBarButton to="/activityManagement">Activity Management</TopBarButton>
         <TopBarButton to="/schedule" active>Schedule</TopBarButton>
         <TopBarButton to="/performance">Performance</TopBarButton>
-        <TopBarButton to ="/support">Your Requests</TopBarButton>
-        <TopBarButton to ="/customer-service">Contact Us</TopBarButton>
+        <TopBarButton to="/support">Your Requests</TopBarButton>
+        <TopBarButton to="/customer-service">Contact Us</TopBarButton>
         <TopBarButton to="/logout"><p className="text-red-500 hover:text-red-600">Logout</p></TopBarButton>
       </TopBar>
-      {/* Contact Us Settings Modal */}
-      {isContactUsOpen && (
-        <ContactUsModel onClose={handleCloseContactUs} />
-      )}
+
+      {isContactUsOpen && <ContactUsModel onClose={() => setisContactUsOpen(false)} />}
 
       <main className="flex flex-col lg:flex-row gap-6 p-6">
+        {/* Schedule Section */}
         <section className="flex-1 bg-bgCard p-4 rounded-xl shadow-md max-h-[80vh] overflow-auto relative">
-          {/* Sticky Header */}
           <div className="sticky top-0 z-20 bg-bgCard pb-2">
             <div className="flex justify-between items-center mb-2">
               <button onClick={() => setWeekOffset(weekOffset - 1)} className="bg-primaryHover px-3 py-1 rounded">←</button>
               <span className="font-bold text-lg">Week of {displayDate(dateRange[0])}</span>
               <button onClick={() => setWeekOffset(weekOffset + 1)} className="bg-primaryHover px-3 py-1 rounded">→</button>
             </div>
-
             <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-8'} border-b border-gray-600`}>
               <div className="p-2 font-bold">Time</div>
               {dateRange.map((date, index) => (
-                <div
-                  key={formatDate(date)}
-                  className={`p-2 text-center font-bold ${index !== dateRange.length - 1 ? 'border-r border-gray-600' : ''} ${formatDate(date) === formatDate(new Date()) ? 'text-accent' : ''}`}
-                >
+                <div key={formatDate(date)} className={`p-2 text-center font-bold ${index !== dateRange.length - 1 ? 'border-r border-gray-600' : ''} ${formatDate(date) === formatDate(new Date()) ? 'text-accent' : ''}`}>
                   {displayDate(date)}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Schedule Body */}
+          {/* Hour grid */}
           <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-8'}`}>
             {hours.map((hour, hourIndex) => (
               <React.Fragment key={hour}>
@@ -200,26 +205,21 @@ export default function StudentSchedulePage() {
                   const dateStr = formatDate(date);
                   const activity = getActivityForSlot(dateStr, hour);
                   return (
-                    <div
-                      key={dateStr + hour}
-                      className={`h-16 p-1 border-t border-gray-600 ${index !== dateRange.length - 1 ? 'border-r border-gray-600' : ''}`}
-                    >
-                      {activity ? (
+                    <div key={dateStr + hour} className={`h-16 p-1 border-t border-gray-600 ${index !== dateRange.length - 1 ? 'border-r border-gray-600' : ''}`}>
+                      {activity && (
                         <div className={`w-full h-full rounded-md px-2 py-1 text-xs ${getColorByType(activity.activityType)}`}>
                           {activity.activityName}
                         </div>
-                      ) : null}
+                      )}
                     </div>
                   );
                 })}
               </React.Fragment>
             ))}
-
           </div>
         </section>
 
-        {/* Today's Tasks Section */}
-
+        {/* Tasks */}
         <section className={`bg-bgCard p-6 rounded-xl shadow-md w-full ${isMobile ? '' : 'lg:w-[320px]'}`}>
           <h2 className="text-2xl font-bold mb-4">Today's Tasks</h2>
           {todaysTasks.length === 0 ? (
@@ -227,28 +227,16 @@ export default function StudentSchedulePage() {
           ) : (
             <ul className="space-y-3">
               {todaysTasks.map((task, i) => (
-                <li
-                  key={i}
-                  className={`bg-[#303043] p-3 rounded-md border-l-4 flex justify-between items-center ${getColorByType(task.activityType)} ${task.completed ? 'opacity-50 line-through' : ''}`}
-                >
+                <li key={i} className={`bg-[#303043] p-3 rounded-md border-l-4 flex justify-between items-center ${getColorByType(task.activityType)} ${task.completed ? 'opacity-50 line-through' : ''}`}>
                   <span>{task.activityName} ({task.startTime} - {task.endTime})</span>
-                  <input
-                    type="checkbox"
-                    checked={task.completed || false}
-                    onChange={() => toggleTaskComplete(i)}
-                    className="accent-primary cursor-pointer"
-                  />
+                  <input type="checkbox" checked={task.completed || false} onChange={() => toggleTaskComplete(i)} className="accent-primary cursor-pointer" />
                 </li>
               ))}
             </ul>
           )}
-          <button
-            onClick={toggleSuggestedSchedule}
-            className="mt-6 bg-primaryHover hover:bg-[#5e32cc] px-4 py-2 w-full rounded text-white font-semibold"
-          >
+          <button onClick={toggleSuggestedSchedule} className="mt-6 bg-primaryHover hover:bg-[#5e32cc] px-4 py-2 w-full rounded text-white font-semibold">
             {showSuggested ? 'Back to Original Schedule' : 'Suggested Schedule'}
           </button>
-
         </section>
       </main>
     </div>

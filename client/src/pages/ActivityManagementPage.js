@@ -40,9 +40,24 @@ export default function ActivityManagementPage() {
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
     );
   };
-
-  const handleSubmit = (e) => {
+  const fetchActivities = async () => {
+    try {
+      const res = await fetch('/api/student/activities', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      const json = await res.json();
+      const data = Array.isArray(json.data) ? json.data : [];
+      setActivities(data);
+    } catch (err) {
+      console.error('Failed to fetch activities:', err);
+    }
+  };
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
     const newActivity = {
       activityName,
       activityType,
@@ -54,28 +69,40 @@ export default function ActivityManagementPage() {
       startTime,
       endTime,
     };
-
-    let updated;
-    if (action === 'edit' && selectedEditIndex !== null) {
-      updated = [...activities];
-      updated[selectedEditIndex] = newActivity;
-      setSelectedEditIndex(null);
-    } else {
-      updated = [...activities, newActivity];
+  
+    console.log('Submitting activity:', newActivity);
+  
+    try {
+      const res = await fetch('/api/student/activities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(newActivity),
+      });
+  
+      if (!res.ok) {
+        throw new Error('Failed to save activity');
+      }
+  
+      await fetchActivities(); // Refresh list with updated data
+  
+      // Reset form
+      setActivityName('');
+      setActivityType('');
+      setAcademicDetail('');
+      setSelectedSubjectId('');
+      setSelectedDays([]);
+      setSelectedDate('');
+      setStartTime('');
+      setEndTime('');
+    } catch (error) {
+      console.error('Error saving activity:', error);
     }
-
-    localStorage.setItem('activities', JSON.stringify(updated));
-    setActivities(updated);
-
-    setActivityName('');
-    setActivityType('');
-    setAcademicDetail('');
-    setSelectedSubjectId('');
-    setSelectedDays([]);
-    setSelectedDate('');
-    setStartTime('');
-    setEndTime('');
   };
+  
+  
 
   const handleDelete = () => {
     const updated = [...activities];

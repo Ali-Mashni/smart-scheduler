@@ -19,8 +19,8 @@ export default function LoginPage({ setUser }) {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      const { role } = JSON.parse(atob(token.split('.')[1]));
-      setUser({ role });
+      const { id, role } = JSON.parse(atob(token.split('.')[1]));
+      setUser({ id, role });
       if (role === 'student') return navigate('/schedule');
       if (role === 'admin')   return navigate('/admin');
       if (role === 'support') return navigate('/faq-management');
