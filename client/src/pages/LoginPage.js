@@ -1,5 +1,3 @@
-// client/src/pages/LoginPage.js
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import TextInput from '../components/TextInput.js';
@@ -13,10 +11,8 @@ import api from '../api';
 export default function LoginPage({ setUser }) {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const [debugInfo, setDebugInfo] = useState(null);
   const navigate = useNavigate();
 
-  // If already logged in, redirect
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -26,9 +22,8 @@ export default function LoginPage({ setUser }) {
         if (role === 'student') return navigate('/schedule');
         if (role === 'admin') return navigate('/admin');
         if (role === 'support') return navigate('/faq-management');
-      } catch (err) {
-        console.error('Error parsing token:', err);
-        localStorage.removeItem('token'); // Clear invalid token
+      } catch {
+        localStorage.removeItem('token');
       }
     }
   }, [navigate, setUser]);
@@ -36,40 +31,24 @@ export default function LoginPage({ setUser }) {
   const handleLogin = async e => {
     e.preventDefault();
     setError('');
-    setDebugInfo(null);
 
     try {
-      console.log('Attempting login with:', form);
-
       const res = await api.post('/api/auth/login', {
         email: form.email,
         password: form.password
       });
 
-      console.log('Login response:', res.data);
-
       const { token } = res.data;
       localStorage.setItem('token', token);
 
-      // Decode payload to get role
       const payload = JSON.parse(atob(token.split('.')[1]));
       const { role } = payload;
       setUser({ role });
 
-      // Redirect based on role
       if (role === 'student') navigate('/schedule');
       else if (role === 'admin') navigate('/admin');
       else if (role === 'support') navigate('/faq-management');
     } catch (err) {
-      console.error('Login error:', err);
-
-      // Set detailed debug info for development
-      setDebugInfo({
-        message: err.message,
-        status: err.response?.status,
-        data: err.response?.data
-      });
-
       setError(
         err.response?.data?.message ||
         'Login failed. Please check your credentials.'
@@ -103,18 +82,6 @@ export default function LoginPage({ setUser }) {
             <p className="text-sm text-gray-300 mb-10">Login to your account</p>
 
             {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
-
-            {/* Debug info display */}
-            {debugInfo && (
-              <div className="mb-4 p-3 bg-gray-800 rounded text-xs">
-                <details>
-                  <summary className="cursor-pointer text-yellow-400 font-bold">Debug Information</summary>
-                  <pre className="mt-2 overflow-auto max-h-40">
-                    {JSON.stringify(debugInfo, null, 2)}
-                  </pre>
-                </details>
-              </div>
-            )}
 
             <form onSubmit={handleLogin} className="space-y-6">
               <TextInput
