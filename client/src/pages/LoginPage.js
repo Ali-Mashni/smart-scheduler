@@ -1,41 +1,79 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // ⬅️ import useNavigate
+// client/src/pages/LoginPage.js
+
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import TextInput from '../components/TextInput.js';
 import PrimaryButton from '../components/PrimaryButton.js';
-import PasswordInput from '../components/PasswordInput';
+import PasswordInput from '../components/PasswordInput.js';
 import loginImage from '../assets/Log_in_image.png';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
-
-const users = [
-  { username: 'student', password: '123', role: 'student' },
-  { username: 'admin', password: 'admin', role: 'admin' },
-  { username: 'support', password: 'helpme', role: 'customer-service' },
-];
+import api from '../api';
 
 export default function LoginPage({ setUser }) {
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // ⬅️ initialize navigate
+  const [debugInfo, setDebugInfo] = useState(null);
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    const found = users.find(
-      (u) => u.username === form.username && u.password === form.password
-    );
-    if (found) {
-      // setUser(found);
-
-      // ⬇️ Navigate based on role
-      if (found.role === 'student') {
-        navigate('/schedule');
-      } else if (found.role === 'admin') {
-        navigate('/admin');
-      } else if (found.role === 'customer-service') {
-        navigate('/faq-management');
+  // If already logged in, redirect
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const { role } = JSON.parse(atob(token.split('.')[1]));
+        setUser({ role });
+        if (role === 'student') return navigate('/schedule');
+        if (role === 'admin') return navigate('/admin');
+        if (role === 'support') return navigate('/faq-management');
+      } catch (err) {
+        console.error('Error parsing token:', err);
+        localStorage.removeItem('token'); // Clear invalid token
       }
-    } else {
-      setError('Invalid username or password');
+    }
+  }, [navigate, setUser]);
+
+  const handleLogin = async e => {
+    e.preventDefault();
+    setError('');
+    setDebugInfo(null);
+
+    try {
+      console.log('Attempting login with:', form);
+
+      const res = await api.post('/api/auth/login', {
+        email: form.email,
+        password: form.password
+      });
+
+      console.log('Login response:', res.data);
+
+      const { token } = res.data;
+      localStorage.setItem('token', token);
+
+      // Decode payload to get role
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const { role } = payload;
+      setUser({ role });
+
+      // Redirect based on role
+      if (role === 'student') navigate('/schedule');
+      else if (role === 'admin') navigate('/admin');
+      else if (role === 'support') navigate('/faq-management');
+    } catch (err) {
+      console.error('Login error:', err);
+
+      // Set detailed debug info for development
+      setDebugInfo({
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data
+      });
+
+      setError(
+        err.response?.data?.message ||
+        'Login failed. Please check your credentials.'
+      );
     }
   };
 
@@ -66,18 +104,31 @@ export default function LoginPage({ setUser }) {
 
             {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
+            {/* Debug info display */}
+            {debugInfo && (
+              <div className="mb-4 p-3 bg-gray-800 rounded text-xs">
+                <details>
+                  <summary className="cursor-pointer text-yellow-400 font-bold">Debug Information</summary>
+                  <pre className="mt-2 overflow-auto max-h-40">
+                    {JSON.stringify(debugInfo, null, 2)}
+                  </pre>
+                </details>
+              </div>
+            )}
+
             <form onSubmit={handleLogin} className="space-y-6">
               <TextInput
-                placeholder="Username"
-                name="username"
-                value={form.username}
-                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                placeholder="Email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={e => setForm({ ...form, email: e.target.value })}
               />
               <PasswordInput
                 placeholder="Password"
                 name="password"
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                onChange={e => setForm({ ...form, password: e.target.value })}
               />
               <PrimaryButton type="submit">Log In</PrimaryButton>
             </form>

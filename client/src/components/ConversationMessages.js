@@ -1,25 +1,33 @@
+// client/src/components/ConversationMessages.js
+
 import React from 'react';
 
-export default function ConversationMessages({ messages }) {
+export default function ConversationMessages({ messages, currentUser }) {
   return (
-    <div className="mb-4 space-y-2 max-h-80 overflow-y-auto border rounded p-4">
-      {messages.map((msg, index) => (
-        <div
-          key={index}
-          className={`flex ${
-            msg.sender === 'Agent' ? 'justify-end' : 'justify-start'
-          }`}
-        >
-          <div className={`text-sm max-w-xs px-3 py-2 rounded shadow ${
-            msg.sender === 'Agent'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700 text-white'
-          }`}>
-            <p className="text-xs text-gray-300 mb-1">{msg.sender}</p>
-            <p>{msg.text}</p>
+    <div className="space-y-4 overflow-auto max-h-[60vh]">
+      {messages.map((msg, idx) => {
+        // msg.sender is "Student" or "Agent"
+        const isSent = msg.sender === currentUser;
+        return (
+          <div
+            key={idx}
+            // local (sent) messages on the right, remote on the left
+            className={`flex ${isSent ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`
+                max-w-[70%]
+                break-words
+                p-3
+                rounded-lg
+                ${isSent ? 'bg-blue-500 text-white' : 'bg-gray-700 text-white'}
+              `}
+            >
+              {msg.text}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

@@ -1,3 +1,5 @@
+// controllers/authController.js
+
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -10,21 +12,20 @@ exports.register = async (req, res) => {
   const { firstName, lastName, username, email, password, role } = req.body;
 
   try {
-    // Check if username OR email already exists
     const existingUser = await User.findOne({
       $or: [{ email }, { username }]
     });
 
     if (existingUser) {
-      // Determine what exactly exists (email or username)
       const conflictField = existingUser.email === email ? 'Email' : 'Username';
-      return res.status(400).json({ message: `${conflictField} already exists` });
+      return res.status(400).json({
+        success: false,
+        message: `${conflictField} already exists.`
+      });
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create the user
     const user = await User.create({
       firstName,
       lastName,
@@ -33,27 +34,32 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       role
     });
-    // Role-specific document creation
-    if (role === 'student') {
-        await Student.create({ user: user._id }); // Minimal data now
-      } 
-      else if (role === 'admin') {
-        await Admin.create({ user: user._id });   // Minimal data now
-      } 
-      else if (role === 'support') {
-        await Support.create({ user: user._id }); // Minimal data now
-      }
 
-    // Generate JWT token
+    if (role === 'student') {
+      await Student.create({ user: user._id });
+    } else if (role === 'admin') {
+      await Admin.create({ user: user._id });
+    } else if (role === 'support') {
+      await Support.create({ user: user._id });
+    }
+
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
 
-    res.status(201).json({ token });
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully.',
+      token
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during registration.'
+    });
   }
 };
 
@@ -63,10 +69,20 @@ exports.login = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password.'
+      });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password.'
+      });
+    }
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -74,8 +90,68 @@ exports.login = async (req, res) => {
       { expiresIn: '1d' }
     );
 
-    res.json({ token });
+    res.status(200).json({
+      success: true,
+      message: 'Login successful.',
+      token
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during login.'
+    });
+  }
+};
+
+// Get User by ID
+exports.getUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const user = await User.findById(userId).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching user data'
+    });
+  }
+};
+
+// Get Current User
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching current user data'
+    });
   }
 };
