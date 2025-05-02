@@ -9,14 +9,29 @@ import {
 
 export default function PerformancePage() {
   const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [today, setToday] = useState(new Date());
   const [weekOffset, setWeekOffset] = useState(0);
   const [isContactUsOpen, setisContactUsOpen] = useState(false);
 
-
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('activities')) || [];
-    setActivities(stored);
+    const fetchActivities = async () => {
+      try {
+        const res = await fetch('/api/student/activities', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        const json = await res.json();
+        setActivities(Array.isArray(json.data) ? json.data : []);
+      } catch (err) {
+        setActivities([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchActivities();
   }, []);
 
   const formatDate = (date) => {
@@ -96,6 +111,8 @@ export default function PerformancePage() {
   const handleCloseContactUs = () => {
     setisContactUsOpen(false);
   };
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-bgMain text-white font-sans">

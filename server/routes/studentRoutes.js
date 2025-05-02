@@ -51,5 +51,76 @@ router.post('/activities', protect, async (req, res) => {
   }
 });
 
+// PATCH /api/student/activities/:activityId
+router.patch('/activities/:activityId', protect, async (req, res) => {
+  try {
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+
+    const activity = student.activities.id(req.params.activityId);
+    if (!activity) return res.status(404).json({ message: 'Activity not found' });
+
+    // Update only the completed status
+    if (req.body.completed !== undefined) {
+      activity.completed = req.body.completed;
+    }
+
+    await student.save();
+    res.json({ success: true, data: activity });
+  } catch (err) {
+    console.error('Error updating activity:', err);
+    res.status(500).json({ message: 'Server error while updating activity' });
+  }
+});
+
+// PUT /api/student/activities/:activityId
+router.put('/activities/:activityId', protect, async (req, res) => {
+  try {
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+
+    const activity = student.activities.id(req.params.activityId);
+    if (!activity) return res.status(404).json({ message: 'Activity not found' });
+
+    // Update all fields
+    Object.assign(activity, req.body);
+    await student.save();
+    
+    res.json({ success: true, data: activity });
+  } catch (err) {
+    console.error('Error updating activity:', err);
+    res.status(500).json({ message: 'Server error while updating activity' });
+  }
+});
+
+// DELETE /api/student/activities/:activityId
+router.delete('/activities/:activityId', protect, async (req, res) => {
+  try {
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) {
+      console.error('Student not found for user:', req.user.id);
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Convert to string for comparison
+    const activity = student.activities.find(
+      a => a._id.toString() === req.params.activityId
+    );
+    if (!activity) {
+      console.error('Activity not found:', req.params.activityId);
+      return res.status(404).json({ message: 'Activity not found' });
+    }
+
+    // Remove the activity
+    student.activities = student.activities.filter(
+      a => a._id.toString() !== req.params.activityId
+    );
+    await student.save();
+    res.json({ success: true, message: 'Activity deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting activity:', err, 'ActivityId:', req.params.activityId, 'User:', req.user.id);
+    res.status(500).json({ message: 'Server error while deleting activity', error: err.message });
+  }
+});
 
 module.exports = router;

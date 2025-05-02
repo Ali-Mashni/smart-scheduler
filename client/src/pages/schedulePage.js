@@ -8,6 +8,7 @@ export default function StudentSchedulePage() {
   const [activities, setActivities] = useState([]);
   const [todaysTasks, setTodaysTasks] = useState([]);
   const [weekOffset, setWeekOffset] = useState(0);
+  const [dayOffset, setDayOffset] = useState(0);
   const [showSuggested, setShowSuggested] = useState(false);
   const [originalActivities, setOriginalActivities] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -21,6 +22,10 @@ export default function StudentSchedulePage() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (!isMobile) setDayOffset(0);
+  }, [isMobile]);
 
   const getStartOfWeek = () => {
     const now = new Date();
@@ -92,7 +97,6 @@ export default function StudentSchedulePage() {
 
         setActivities(data);
         setOriginalActivities(data);
-        console.log(data)
         const todayDate = formatDate(new Date());
         const weekday = new Date(todayDate).toLocaleDateString('en-US', { weekday: 'long' });
 
@@ -108,9 +112,45 @@ export default function StudentSchedulePage() {
     };
 
     fetchActivities();
-  }, [weekOffset, user]);
+  }, [user?.id]);
 
-  const toggleTaskComplete = (index) => {
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token && !user?.id) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.id) {
+          fetch('/api/student/activities', {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+          })
+          .then(res => res.json())
+          .then(json => {
+            const data = Array.isArray(json.data) ? json.data : [];
+            setActivities(data);
+            setOriginalActivities(data);
+            const todayDate = formatDate(new Date());
+            const weekday = new Date(todayDate).toLocaleDateString('en-US', { weekday: 'long' });
+            const todayTasks = data.filter((a) =>
+              a.isPermanent ? a.selectedDays.includes(weekday) : formatDate(new Date(a.selectedDate)) === todayDate
+            );
+            setTodaysTasks(todayTasks);
+          })
+          .catch(err => {
+            console.error('Failed to fetch activities:', err);
+            setActivities([]);
+            setTodaysTasks([]);
+          });
+        }
+      } catch (err) {
+        console.error('Error parsing token:', err);
+      }
+    }
+  }, []);
+
+  const toggleTaskComplete = async (index) => {
     const updated = [...todaysTasks];
     updated[index].completed = !updated[index].completed;
     const updatedAll = activities.map((a) => {
@@ -121,9 +161,33 @@ export default function StudentSchedulePage() {
     });
     setTodaysTasks(updated);
     setActivities(updatedAll);
-    // Here: you can optionally send a PATCH request to update backend.
+
+    // Save to database
+    try {
+      const activityToUpdate = updated[index];
+      const response = await fetch(`/api/student/activities/${activityToUpdate._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ completed: activityToUpdate.completed }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update activity status');
+      }
+    } catch (error) {
+      console.error('Error updating activity status:', error);
+      // Revert the state if the update fails
+      const reverted = [...todaysTasks];
+      reverted[index].completed = !reverted[index].completed;
+      setTodaysTasks(reverted);
+      setActivities(activities);
+    }
   };
 
+  // Suggested schedule logic (can be customized as needed)
   const toggleSuggestedSchedule = () => {
     if (showSuggested) {
       setActivities(originalActivities);
@@ -160,9 +224,13 @@ export default function StudentSchedulePage() {
   };
 
   const weekDates = getStartOfWeek();
-  const singleDay = [weekDates[new Date().getDay()]];
+  const mobileDay = (() => {
+    const today = new Date();
+    today.setDate(today.getDate() + dayOffset);
+    return [today];
+  })();
+  const dateRange = isMobile ? mobileDay : weekDates;
   const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-  const dateRange = isMobile ? singleDay : weekDates;
 
   return (
     <div className="min-h-screen bg-bgMain text-white font-sans">
@@ -182,9 +250,9 @@ export default function StudentSchedulePage() {
         <section className="flex-1 bg-bgCard p-4 rounded-xl shadow-md max-h-[80vh] overflow-auto relative">
           <div className="sticky top-0 z-20 bg-bgCard pb-2">
             <div className="flex justify-between items-center mb-2">
-              <button onClick={() => setWeekOffset(weekOffset - 1)} className="bg-primaryHover px-3 py-1 rounded">←</button>
+              <button onClick={() => isMobile ? setDayOffset(dayOffset - 1) : setWeekOffset(weekOffset - 1)} className="bg-primaryHover px-3 py-1 rounded">←</button>
               <span className="font-bold text-lg">Week of {displayDate(dateRange[0])}</span>
-              <button onClick={() => setWeekOffset(weekOffset + 1)} className="bg-primaryHover px-3 py-1 rounded">→</button>
+              <button onClick={() => isMobile ? setDayOffset(dayOffset + 1) : setWeekOffset(weekOffset + 1)} className="bg-primaryHover px-3 py-1 rounded">→</button>
             </div>
             <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-8'} border-b border-gray-600`}>
               <div className="p-2 font-bold">Time</div>

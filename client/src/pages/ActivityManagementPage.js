@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
@@ -24,22 +23,13 @@ export default function ActivityManagementPage() {
   const [selectedIndexToDelete, setSelectedIndexToDelete] = useState(null);
   const [selectedEditIndex, setSelectedEditIndex] = useState(null);
   const [isContactUsOpen, setisContactUsOpen] = useState(false);
+  const [studyDaysBeforeExam, setStudyDaysBeforeExam] = useState(5);
+  const [preferredTime, setPreferredTime] = useState('morning');
+  const [conflictMsg, setConflictMsg] = useState('');
 
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('activities')) || [];
-    const savedSubjects = JSON.parse(localStorage.getItem('subjects')) || [];
-    setActivities(saved);
-    setSubjects(savedSubjects);
-  }, []);
-
-  const toggleDay = (day) => {
-    setSelectedDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
-  };
   const fetchActivities = async () => {
     try {
       const res = await fetch('/api/student/activities', {
@@ -48,16 +38,33 @@ export default function ActivityManagementPage() {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
       });
+      if (!res.ok) throw new Error('Failed to fetch activities');
       const json = await res.json();
       const data = Array.isArray(json.data) ? json.data : [];
       setActivities(data);
     } catch (err) {
       console.error('Failed to fetch activities:', err);
+      setActivities([]);
     }
   };
+
+  useEffect(() => {
+    fetchActivities();
+    const savedSubjects = JSON.parse(localStorage.getItem('subjects')) || [];
+    setSubjects(savedSubjects);
+  }, []);
+
+  const toggleDay = (day) => {
+    setSelectedDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
   
+    const isExam = activityType === 'academic' && ['midterm', 'final', 'quiz'].includes(academicDetail);
+
     const newActivity = {
       activityName,
       activityType,
@@ -68,9 +75,15 @@ export default function ActivityManagementPage() {
       selectedDate: isPermanent ? null : selectedDate,
       startTime,
       endTime,
+      studyDaysBeforeExam: isExam ? studyDaysBeforeExam : undefined,
+      preferredTime: isExam ? preferredTime : undefined,
     };
   
-    console.log('Submitting activity:', newActivity);
+    if (hasTimeConflict(newActivity, activities)) {
+      setConflictMsg('This task conflicts with another task at the same time.');
+      return;
+    }
+    setConflictMsg('');
   
     try {
       const res = await fetch('/api/student/activities', {
@@ -97,19 +110,34 @@ export default function ActivityManagementPage() {
       setSelectedDate('');
       setStartTime('');
       setEndTime('');
+      setAction('add'); // Reset to add mode after successful submission
+      setStudyDaysBeforeExam(5);
+      setPreferredTime('morning');
     } catch (error) {
       console.error('Error saving activity:', error);
     }
   };
-  
-  
 
-  const handleDelete = () => {
-    const updated = [...activities];
-    updated.splice(selectedIndexToDelete, 1);
-    localStorage.setItem('activities', JSON.stringify(updated));
-    setActivities(updated);
-    setSelectedIndexToDelete(null);
+  const handleDelete = async () => {
+    try {
+      const activityToDelete = activities[selectedIndexToDelete];
+      const res = await fetch(`/api/student/activities/${activityToDelete._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to delete activity');
+      }
+
+      await fetchActivities(); // Refresh the activities list
+      setSelectedIndexToDelete(null);
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+    }
   };
 
   const handleSelectEdit = (index) => {
@@ -120,10 +148,60 @@ export default function ActivityManagementPage() {
     setAcademicDetail(act.academicDetail || '');
     setSelectedSubjectId(act.subjectId || '');
     setIsPermanent(act.isPermanent);
-    setSelectedDays(act.selectedDays);
+    setSelectedDays(act.selectedDays || []);
     setSelectedDate(act.selectedDate || '');
     setStartTime(act.startTime);
     setEndTime(act.endTime);
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    if (selectedEditIndex === null) return;
+
+    const isExam = activityType === 'academic' && ['midterm', 'final', 'quiz'].includes(academicDetail);
+
+    const updatedActivity = {
+      activityName,
+      activityType,
+      academicDetail: activityType === 'academic' ? academicDetail : '',
+      subjectId: activityType === 'academic' ? selectedSubjectId : '',
+      isPermanent,
+      selectedDays: isPermanent ? selectedDays : [],
+      selectedDate: isPermanent ? null : selectedDate,
+      startTime,
+      endTime,
+      studyDaysBeforeExam: isExam ? studyDaysBeforeExam : undefined,
+      preferredTime: isExam ? preferredTime : undefined,
+    };
+
+    if (hasTimeConflict(updatedActivity, activities, selectedEditIndex)) {
+      setConflictMsg('This task conflicts with another task at the same time.');
+      return;
+    }
+    setConflictMsg('');
+
+    try {
+      const res = await fetch(`/api/student/activities/${activities[selectedEditIndex]._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(updatedActivity),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to update activity');
+      }
+
+      await fetchActivities();
+      setSelectedEditIndex(null);
+      setAction('add');
+      setStudyDaysBeforeExam(5);
+      setPreferredTime('morning');
+    } catch (error) {
+      console.error('Error updating activity:', error);
+    }
   };
 
   const handleAddSubject = () => {
@@ -151,6 +229,33 @@ export default function ActivityManagementPage() {
     setisContactUsOpen(false);
   };
 
+  function hasTimeConflict(newActivity, activities, ignoreIndex = null) {
+    // Only check for the same date (for temporary) or same day (for permanent)
+    return activities.some((a, idx) => {
+      if (ignoreIndex !== null && idx === ignoreIndex) return false; // skip self when editing
+
+      // Check if on the same day/date
+      let sameDay = false;
+      if (newActivity.isPermanent && a.isPermanent) {
+        sameDay = newActivity.selectedDays.some(day => a.selectedDays.includes(day));
+      } else if (!newActivity.isPermanent && !a.isPermanent) {
+        sameDay = newActivity.selectedDate === a.selectedDate;
+      } else {
+        return false; // don't compare permanent with temporary
+      }
+
+      if (!sameDay) return false;
+
+      // Check for time overlap
+      const startA = parseInt(a.startTime.replace(':', ''), 10);
+      const endA = parseInt(a.endTime.replace(':', ''), 10);
+      const startB = parseInt(newActivity.startTime.replace(':', ''), 10);
+      const endB = parseInt(newActivity.endTime.replace(':', ''), 10);
+
+      return (startA < endB && startB < endA);
+    });
+  }
+
   return (
     <div className="min-h-screen bg-bgMain text-white font-sans">
       <TopBar>
@@ -166,30 +271,30 @@ export default function ActivityManagementPage() {
         <ContactUsModel onClose={handleCloseContactUs} />
       )}
 
-      <div className="flex flex-col lg:flex-row gap-6 p-6">
-        <aside className="lg:w-1/4 bg-bgCard p-4 rounded-xl shadow-md space-y-4">
+      <div className="flex flex-col lg:flex-row gap-8 p-8">
+        <aside className="lg:w-1/4 bg-gray-800 p-6 rounded-lg shadow-md space-y-4">
           {['add', 'edit', 'delete', 'courses'].map((a) => (
             <button
               key={a}
               onClick={() => setAction(a)}
-              className={`w-full text-left py-2 px-3 rounded capitalize ${action === a ? 'bg-primaryHover text-white' : 'hover:bg-primaryHover text-gray-300'}`}
+              className={`w-full text-left py-2.5 px-4 rounded-lg capitalize ${action === a ? 'bg-purple-700 text-white' : 'hover:bg-purple-900/50 text-gray-300'}`}
             >
               {a} {a === 'courses' ? '' : 'Activity'}
             </button>
           ))}
         </aside>
 
-        <section className="flex-1 bg-bgCard p-6 rounded-xl shadow-md">
-          <h2 className="text-2xl font-bold mb-6 capitalize">{action} Activity</h2>
+        <section className="flex-1 bg-gray-800 p-8 rounded-lg shadow-md">
+          <h2 className="text-3xl font-semibold mb-8 capitalize">{action} Activity</h2>
 
           {action === 'courses' && (
             <div>
-              <h3 className="text-xl font-semibold mb-4">Courses</h3>
+              <h3 className="text-2xl font-medium mb-6">Courses</h3>
               <ul className="space-y-2 mb-4">
                 {subjects.map((subj) => (
-                  <li key={subj.id} className="flex justify-between bg-[#303043] p-3 rounded-md">
+                  <li key={subj.id} className="flex justify-between bg-gray-700/60 p-4 rounded-lg">
                     {subj.name}
-                    <button onClick={() => handleDeleteSubject(subj.id)} className="text-red-400 hover:text-red-600">Delete</button>
+                    <button onClick={() => handleDeleteSubject(subj.id)} className="text-red-400 hover:text-red-500">Delete</button>
                   </li>
                 ))}
               </ul>
@@ -198,9 +303,9 @@ export default function ActivityManagementPage() {
                   value={newCourseName}
                   onChange={(e) => setNewCourseName(e.target.value)}
                   placeholder="New Course Name"
-                  className="flex-1 bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2"
+                  className="flex-1 bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
-                <button onClick={handleAddSubject} className="bg-primaryHover px-4 py-2 rounded text-white">Add</button>
+                <button onClick={handleAddSubject} className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg">Add</button>
               </div>
             </div>
           )}
@@ -213,7 +318,7 @@ export default function ActivityManagementPage() {
                     <li
                       key={idx}
                       onClick={() => handleSelectEdit(idx)}
-                      className={`p-3 rounded-md cursor-pointer ${selectedEditIndex === idx ? 'bg-[#7345df]' : 'bg-[#303043]'} hover:bg-primaryHover`}
+                      className={`p-4 rounded-lg cursor-pointer ${selectedEditIndex === idx ? 'bg-purple-700' : 'bg-gray-700/60'} hover:bg-purple-900/50`}
                     >
                       {act.activityName} ({act.activityType})
                     </li>
@@ -221,25 +326,25 @@ export default function ActivityManagementPage() {
                 </ul>
               )}
 
-              <form className="space-y-4 max-w-2xl" onSubmit={handleSubmit}>
+              <form className="space-y-6 max-w-2xl" onSubmit={action === 'edit' ? handleUpdate : handleSubmit}>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-1 text-sm">Activity Name</label>
+                    <label className="block mb-2 text-sm">Activity Name</label>
                     <input
                       value={activityName}
                       onChange={(e) => setActivityName(e.target.value)}
                       type="text"
-                      className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2"
+                      className="w-full bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       placeholder="e.g., Gym Session"
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-sm">Activity Type</label>
+                    <label className="block mb-2 text-sm">Activity Type</label>
                     <select
                       value={activityType}
                       onChange={(e) => setActivityType(e.target.value)}
-                      className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2"
+                      className="w-full bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     >
                       <option value="">Select type</option>
                       <option value="academic">Academic</option>
@@ -253,11 +358,11 @@ export default function ActivityManagementPage() {
                 {activityType === 'academic' && (
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block mb-1 text-sm">Select Course</label>
+                      <label className="block mb-2 text-sm">Select Course</label>
                       <select
                         value={selectedSubjectId}
                         onChange={(e) => setSelectedSubjectId(e.target.value)}
-                        className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2"
+                        className="w-full bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
                         <option value="">Select Course</option>
                         {subjects.map((s) => (
@@ -266,11 +371,11 @@ export default function ActivityManagementPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block mb-1 text-sm">Academic Detail</label>
+                      <label className="block mb-2 text-sm">Academic Detail</label>
                       <select
                         value={academicDetail}
                         onChange={(e) => setAcademicDetail(e.target.value)}
-                        className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2"
+                        className="w-full bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       >
                         <option value="">Select</option>
                         <option value="class">Class</option>
@@ -285,25 +390,52 @@ export default function ActivityManagementPage() {
                   </div>
                 )}
 
+                {activityType === 'academic' && ['midterm', 'final', 'quiz'].includes(academicDetail) && (
+                  <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm mb-1">Days before exam to start studying:</label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={14}
+                        value={studyDaysBeforeExam}
+                        onChange={e => setStudyDaysBeforeExam(Number(e.target.value))}
+                        className="bg-[#303043] text-white border border-gray-600 rounded-md px-2 py-1 w-20"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">Preferred study time:</label>
+                      <select
+                        value={preferredTime}
+                        onChange={e => setPreferredTime(e.target.value)}
+                        className="bg-[#303043] text-white border border-gray-600 rounded-md px-2 py-1"
+                      >
+                        <option value="morning">Morning</option>
+                        <option value="night">Night</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
                 <div className="mb-4">
-                  <label className="block mb-1 text-sm">Task Type</label>
+                  <label className="block mb-2 text-sm">Task Type</label>
                   <div className="flex gap-4">
-                    <button type="button" onClick={() => setIsPermanent(true)} className={`px-4 py-2 rounded-md border ${isPermanent ? 'bg-primaryHover text-white' : 'bg-[#303043] text-gray-300'}`}>Permanent</button>
-                    <button type="button" onClick={() => setIsPermanent(false)} className={`px-4 py-2 rounded-md border ${!isPermanent ? 'bg-primaryHover text-white' : 'bg-[#303043] text-gray-300'}`}>Temporary</button>
+                    <button type="button" onClick={() => setIsPermanent(true)} className={`px-4 py-2.5 border border-gray-600 rounded-l-lg ${isPermanent ? 'bg-purple-700 text-white' : 'bg-gray-700/60 text-gray-300 hover:bg-gray-700/80'}`}>Permanent</button>
+                    <button type="button" onClick={() => setIsPermanent(false)} className={`px-4 py-2.5 border border-gray-600 rounded-r-lg ${!isPermanent ? 'bg-purple-700 text-white' : 'bg-gray-700/60 text-gray-300 hover:bg-gray-700/80'}`}>Temporary</button>
                   </div>
                 </div>
 
                 {isPermanent ? (
                   <div className="relative">
-                    <label className="block mb-1 text-sm">Days</label>
-                    <div onClick={() => setShowDropdown(!showDropdown)} className="cursor-pointer bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2">
+                    <label className="block mb-2 text-sm">Days</label>
+                    <div onClick={() => setShowDropdown(!showDropdown)} className="cursor-pointer bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                       {selectedDays.length > 0 ? selectedDays.join(', ') : 'Select days'}
                     </div>
                     {showDropdown && (
-                      <div className="absolute z-10 mt-1 w-full bg-[#2a2a3c] border border-gray-600 rounded-md shadow-lg max-h-48 overflow-auto">
+                      <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto">
                         {daysOfWeek.map((day) => (
-                          <label key={day} className="flex items-center px-4 py-2 hover:bg-[#393953] cursor-pointer text-sm">
-                            <input type="checkbox" checked={selectedDays.includes(day)} onChange={() => toggleDay(day)} className="mr-2 accent-primaryHover" />
+                          <label key={day} className="flex items-center px-4 py-2 hover:bg-purple-900/50 cursor-pointer text-sm">
+                            <input type="checkbox" checked={selectedDays.includes(day)} onChange={() => toggleDay(day)} className="mr-2 accent-purple-500" />
                             {day}
                           </label>
                         ))}
@@ -312,24 +444,28 @@ export default function ActivityManagementPage() {
                   </div>
                 ) : (
                   <div>
-                    <label className="block mb-1 text-sm">Date</label>
-                    <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2" />
+                    <label className="block mb-2 text-sm">Date</label>
+                    <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
                   </div>
                 )}
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-1 text-sm">Start Time</label>
-                    <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2" />
+                    <label className="block mb-2 text-sm">Start Time</label>
+                    <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
                   </div>
                   <div>
-                    <label className="block mb-1 text-sm">End Time</label>
-                    <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="w-full bg-[#303043] text-white border border-gray-600 rounded-md px-4 py-2" />
+                    <label className="block mb-2 text-sm">End Time</label>
+                    <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="w-full bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
                   </div>
                 </div>
 
+                {conflictMsg && (
+                  <div className="text-red-400 text-sm mt-2">{conflictMsg}</div>
+                )}
+
                 <div className="pt-4">
-                  <button type="submit" className="bg-primaryHover hover:bg-[#5e32cc] px-6 py-2 rounded text-white font-semibold">
+                  <button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2.5 px-6 rounded-lg">
                     {action === 'edit' && selectedEditIndex !== null ? 'Update' : 'Save'}
                   </button>
                 </div>
@@ -344,7 +480,7 @@ export default function ActivityManagementPage() {
                   <li
                     key={idx}
                     onClick={() => setSelectedIndexToDelete(idx)}
-                    className={`p-3 rounded-md cursor-pointer ${selectedIndexToDelete === idx ? 'bg-[#7345df]' : 'bg-[#303043]'} hover:bg-primaryHover`}
+                    className={`p-4 rounded-lg cursor-pointer ${selectedIndexToDelete === idx ? 'bg-purple-700' : 'bg-gray-700/60'} hover:bg-purple-900/50`}
                   >
                     {activity.activityName} ({activity.activityType})
                   </li>
@@ -352,7 +488,7 @@ export default function ActivityManagementPage() {
               </ul>
               {selectedIndexToDelete !== null && (
                 <div className="pt-6">
-                  <button onClick={handleDelete} className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded text-white font-semibold">Delete Selected</button>
+                  <button onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-6 rounded-lg">Delete Selected</button>
                 </div>
               )}
             </div>
