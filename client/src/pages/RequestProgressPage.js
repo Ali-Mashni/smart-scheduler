@@ -65,7 +65,7 @@ export default function RequestProgressPage() {
         {!tickets.length ? (
           <p className="text-gray-400">No active requests.</p>
         ) : (
-          <ul className="space-y-4">
+          <ul className="space-y-4 max-h-[70vh] overflow-y-auto">
             {tickets.map(t => {
               const pct = getProgress(t.status);
               return (

@@ -28,18 +28,24 @@ exports.createRequest = async (req, res) => {
 };
 
 // Get all support requests
-// Get all support requests for the logged-in user
 exports.getRequests = async (req, res) => {
   try {
-    const requests = await SupportRequest.find({ user: req.user.id })  // ✅ Filter by logged-in user
-      .populate('user assignedAgent');
+    let requests;
+    // If user is support staff or admin, show all requests
+    if (req.user.role === 'support' || req.user.role === 'admin') {
+      requests = await SupportRequest.find()
+        .populate('user assignedAgent');
+    } else {
+      // For students, only show their own requests
+      requests = await SupportRequest.find({ user: req.user.id })
+        .populate('user assignedAgent');
+    }
 
     res.status(200).json({ success: true, count: requests.length, data: requests });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
-
 
 // Update support request status
 exports.updateRequestStatus = async (req, res) => {
