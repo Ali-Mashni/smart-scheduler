@@ -1,5 +1,3 @@
-// client/src/pages/StudentSupportPage.js
-
 import React, { useState, useEffect } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
@@ -26,9 +24,9 @@ export default function StudentSupportPage() {
           subject: t.title,
           message: t.description,
         }));
-        const inProg = all.filter(t => t.status === 'In Progress');
-        setTickets(inProg);
-        if (inProg.length) setSelectedId(inProg[0].id);
+        const relevant = all.filter(t => t.status === 'In Progress' || t.status === 'Pending');
+        setTickets(relevant);
+        if (relevant.length) setSelectedId(relevant[0].id);
       } catch (err) {
         console.error('Failed to fetch tickets:', err);
       }
@@ -98,7 +96,7 @@ export default function StudentSupportPage() {
         <div className="w-full md:w-1/3 bg-bgCard p-4 rounded">
           <h3 className="text-xl font-semibold mb-4">Your Requests</h3>
           {!tickets.length ? (
-            <p className="text-gray-400">No active requests.</p>
+            <p className="text-gray-400">You don't have any support requests yet.</p>
           ) : (
             <ul className="space-y-3">
               {tickets.map(t => (
@@ -126,10 +124,25 @@ export default function StudentSupportPage() {
               <h3 className="text-xl font-bold mb-2">
                 {selectedTicket.subject}
               </h3>
-              <ConversationMessages
-                messages={conversation}
-                currentUser="Student"
-              />
+
+              {conversation.length === 0 ? (
+                <p className="text-gray-400 mb-4">
+                  No replies yet. Please wait for our support team to respond.
+                </p>
+              ) : (
+                <>
+                  <ConversationMessages
+                    messages={conversation}
+                    currentUser="Student"
+                  />
+                  {selectedTicket.status === 'Pending' && (
+                    <p className="text-yellow-400 mt-4 text-sm">
+                      Your request is still pending. An agent will respond soon.
+                    </p>
+                  )}
+                </>
+              )}
+
               <MessageTextarea
                 name="message"
                 placeholder="Type your reply..."
