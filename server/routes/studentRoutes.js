@@ -123,4 +123,19 @@ router.delete('/activities/:activityId', protect, async (req, res) => {
   }
 });
 
+// PATCH /api/student/courses - add or update courses
+router.patch('/courses', protect, async (req, res) => {
+  try {
+    const { courses } = req.body; // expects an array of {id, name}
+    const student = await Student.findOne({ user: req.user.id });
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+
+    student.courses = courses;
+    await student.save();
+    res.json({ success: true, data: student.courses });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

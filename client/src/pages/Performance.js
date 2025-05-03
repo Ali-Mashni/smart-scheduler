@@ -101,6 +101,34 @@ export default function PerformancePage() {
       };
     });
   };
+
+  // Helper to get duration in hours
+  const getDurationInHours = (startTime, endTime) => {
+    const [startH, startM] = startTime.split(':').map(Number);
+    const [endH, endM] = endTime.split(':').map(Number);
+    return (endH + endM / 60) - (startH + startM / 60);
+  };
+
+  // Helper to get study hours by subject
+  const getStudyHoursBySubject = () => {
+    const studyActivities = activities.filter(a =>
+      a.activityType === 'academic' &&
+      a.academicDetail === 'study' &&
+      a.completed
+    );
+    const subjectMap = {};
+    studyActivities.forEach(a => {
+      const subject = a.subjectId || 'Unknown Subject';
+      const hours = getDurationInHours(a.startTime, a.endTime);
+      if (!subjectMap[subject]) subjectMap[subject] = 0;
+      subjectMap[subject] += hours;
+    });
+    return Object.entries(subjectMap).map(([subject, hours]) => ({
+      subject,
+      hours: Number(hours.toFixed(2)),
+    }));
+  };
+
   //Handle creation of ticket
   // Handle opening settings modal
   const handleOpenContactUs = () => {
@@ -200,6 +228,18 @@ export default function PerformancePage() {
             {Object.keys(TYPE_COLORS).map(type => (
               <Bar key={type} dataKey={type} stackId="a" fill={TYPE_COLORS[type]} />
             ))}
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Study Hours by Subject */}
+      <div className="bg-bgCard p-6 rounded-xl shadow-md col-span-full mt-6">
+        <h2 className="text-lg sm:text-xl font-semibold mb-4">Study Hours by Subject</h2>
+        <ResponsiveContainer width="100%" height={320}>
+          <BarChart data={getStudyHoursBySubject()}>
+            <XAxis dataKey="subject" stroke="#aaa" />
+            <YAxis stroke="#aaa" label={{ value: 'Hours', angle: -90, position: 'insideLeft' }} />
+            <Bar dataKey="hours" fill="#7A73D1" />
           </BarChart>
         </ResponsiveContainer>
       </div>

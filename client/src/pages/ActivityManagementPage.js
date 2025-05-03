@@ -48,10 +48,20 @@ export default function ActivityManagementPage() {
     }
   };
 
+  const fetchStudentCourses = async () => {
+    const res = await fetch('/api/student/me', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    const student = await res.json();
+    setSubjects(student.courses || []);
+  };
+
   useEffect(() => {
     fetchActivities();
-    const savedSubjects = JSON.parse(localStorage.getItem('subjects')) || [];
-    setSubjects(savedSubjects);
+    fetchStudentCourses();
   }, []);
 
   const toggleDay = (day) => {
@@ -214,19 +224,64 @@ export default function ActivityManagementPage() {
     }
   };
 
-  const handleAddSubject = () => {
+  const handleAddSubject = async () => {
     if (!newCourseName.trim()) return;
     const newSubj = { id: Date.now().toString(), name: newCourseName };
     const updated = [...subjects, newSubj];
-    localStorage.setItem('subjects', JSON.stringify(updated));
+
+    // Update backend
+    await fetch('/api/student/courses', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ courses: updated }),
+    });
+
     setSubjects(updated);
     setNewCourseName('');
   };
 
-  const handleDeleteSubject = (id) => {
-    const updated = subjects.filter((s) => s.id !== id);
-    localStorage.setItem('subjects', JSON.stringify(updated));
-    setSubjects(updated);
+  const handleDeleteSubject = async (id) => {
+    // Find the course name for the warning
+    const course = subjects.find(s => s.id === id);
+    // Find related activities
+    const relatedActivities = activities.filter(a => a.subjectId === id);
+
+    let message = `Are you sure you want to delete the course "${course?.name}"?`;
+    if (relatedActivities.length > 0) {
+      message += `\n\nWarning: This will also delete ${relatedActivities.length} related activity(ies)!`;
+    }
+
+    if (!window.confirm(message)) return;
+
+    // Remove the course
+    const updatedCourses = subjects.filter((s) => s.id !== id);
+
+    // Update backend for courses
+    await fetch('/api/student/courses', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ courses: updatedCourses }),
+    });
+
+    // Delete related activities one by one
+    for (const activity of relatedActivities) {
+      await fetch(`/api/student/activities/${activity._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+    }
+
+    fetchStudentCourses();
+    fetchActivities();
   };
   //Handle creation of ticket
   // Handle opening settings modal

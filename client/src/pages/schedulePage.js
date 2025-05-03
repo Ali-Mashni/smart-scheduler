@@ -284,12 +284,11 @@ export default function StudentSchedulePage() {
                       top: 0,
                       height: '60px',
                     }}>
-                      {activity && (
-                        
-                        <div className={`w-full rounded-md px-2 py-1 text-xs ${getColorByType(activity.activityType)}` }
-                        style={{
-                          height:`${getDurationInHours(activity.startTime, activity.endTime) * 60}px`,
-                        }}>
+                      {activity && hour === activity.startTime.slice(0, 2).padStart(2, '0') + ':00' && (
+                        <div className={`w-full rounded-md px-2 py-1 text-xs ${getColorByType(activity.activityType)}`}
+                          style={{
+                            height:`${getDurationInHours(activity.startTime, activity.endTime) * 60}px`,
+                          }}>
                           {activity.activityName}
                         </div>
                       )}

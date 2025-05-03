@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
+
 dotenv.config();
 connectDB();
 
@@ -25,6 +26,7 @@ app.use('/api/student', require('./routes/studentRoutes'));
 app.use('/api/support/faqs', require('./routes/supportFaqRoutes'));
 app.use('/api/support/requests', require('./routes/supportRequestRoutes'));
 app.use('/api/support/messages', require('./routes/supportMessageRoutes'));
+
 
 // Default route
 app.get('/', (req, res) => {

@@ -14,9 +14,15 @@ const activitySchema = new mongoose.Schema({
   completed: { type: Boolean, default: false }
 }, { _id: true });
 
+const courseSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true }
+}, { _id: false });
+
 const studentSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  activities: [activitySchema]
+  activities: [activitySchema],
+  courses: [courseSchema]
 });
 
 module.exports = mongoose.model('Student', studentSchema);
