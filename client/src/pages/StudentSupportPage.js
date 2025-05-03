@@ -81,7 +81,7 @@ export default function StudentSupportPage() {
   const selectedTicket = tickets.find(t => t.id === selectedId);
 
   return (
-    <div className="min-h-screen bg-bgMain text-white">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden overflow-auto bg-bgMain text-white">
       <TopBar>
         <TopBarButton to="/activityManagement">Activity Management</TopBarButton>
         <TopBarButton to="/schedule">Schedule</TopBarButton>

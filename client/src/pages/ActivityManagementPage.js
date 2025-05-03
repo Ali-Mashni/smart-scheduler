@@ -78,11 +78,17 @@ export default function ActivityManagementPage() {
       studyDaysBeforeExam: isExam ? studyDaysBeforeExam : undefined,
       preferredTime: isExam ? preferredTime : undefined,
     };
+
+    if(newActivity.endTime<newActivity.startTime){
+    setConflictMsg('End time must be more than start time.');
+    return;
+    }
   
     if (hasTimeConflict(newActivity, activities)) {
       setConflictMsg('This task conflicts with another task at the same time.');
       return;
     }
+    
     setConflictMsg('');
   
     try {
@@ -178,6 +184,10 @@ export default function ActivityManagementPage() {
       setConflictMsg('This task conflicts with another task at the same time.');
       return;
     }
+    // if(updatedActivity.endTime<updatedActivity.startTime){
+    //   setConflictMsg('End time must be more than start time.');
+    //   return;
+    // }
     setConflictMsg('');
 
     try {
@@ -257,7 +267,7 @@ export default function ActivityManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bgMain text-white font-sans">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden overflow-auto bg-bgMain text-white font-sans">
       <TopBar>
         <TopBarButton to="/activityManagement" active>Activity Management</TopBarButton>
         <TopBarButton to="/schedule">Schedule</TopBarButton>
@@ -271,44 +281,51 @@ export default function ActivityManagementPage() {
         <ContactUsModel onClose={handleCloseContactUs} />
       )}
 
-      <div className="flex flex-col lg:flex-row gap-8 p-8">
-        <aside className="lg:w-1/4 bg-gray-800 p-6 rounded-lg shadow-md space-y-4">
-          {['add', 'edit', 'delete', 'courses'].map((a) => (
-            <button
-              key={a}
-              onClick={() => setAction(a)}
-              className={`w-full text-left py-2.5 px-4 rounded-lg capitalize ${action === a ? 'bg-purple-700 text-white' : 'hover:bg-purple-900/50 text-gray-300'}`}
-            >
-              {a} {a === 'courses' ? '' : 'Activity'}
-            </button>
+<div className="h-screen flex overflow-hidden p-4 gap-6 ">
+  {/* Left Sidebar - scrollable */}
+  <aside className="w-full lg:w-1/4 bg-gray-800 p-6 rounded-lg shadow-md overflow-y-auto max-h-[calc(100vh-100px)]">
+    {['add', 'edit', 'delete', 'courses'].map((a) => (
+      <button
+        key={a}
+        onClick={() => setAction(a)}
+        className={`w-full text-left py-2.5 px-4 rounded-lg capitalize ${action === a ? 'bg-purple-700 text-white' : 'hover:bg-purple-900/50 text-gray-300'}`}
+      >
+        {a} {a === 'courses' ? '' : 'Activity'}
+      </button>
+    ))}
+  </aside>
+
+  {/* Right Content - scrollable */}
+  <section className="flex-1 bg-gray-800 p-8 rounded-lg shadow-md max-h-[calc(100vh-100px)]">
+    <div>
+    <h2 className="text-3xl font-semibold mb-8 capitalize">{action} Activity</h2>
+    </div>
+
+    <div className='flex-1 bg-gray-800 p-8 rounded-lg shadow-md overflow-y-auto max-h-[calc(100vh-200px)]'>
+    {/* All your dynamic action content here */}
+    {action === 'courses' && (
+      <div className="flex flex-col gap-4">
+        <h3 className="text-2xl font-medium mb-2">Courses</h3>
+        <ul className="space-y-2">
+          {subjects.map((subj) => (
+            <li key={subj.id} className="flex justify-between bg-gray-700/60 p-4 rounded-lg">
+              {subj.name}
+              <button onClick={() => handleDeleteSubject(subj.id)} className="text-red-400 hover:text-red-500">Delete</button>
+            </li>
           ))}
-        </aside>
+        </ul>
+        <div className="flex gap-2 flex-col sm:flex-row mt-auto">
+          <input
+            value={newCourseName}
+            onChange={(e) => setNewCourseName(e.target.value)}
+            placeholder="New Course Name"
+            className="flex-1 bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          />
+          <button onClick={handleAddSubject} className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg">Add</button>
+        </div>
+      </div>
+    )}
 
-        <section className="flex-1 bg-gray-800 p-8 rounded-lg shadow-md">
-          <h2 className="text-3xl font-semibold mb-8 capitalize">{action} Activity</h2>
-
-          {action === 'courses' && (
-            <div>
-              <h3 className="text-2xl font-medium mb-6">Courses</h3>
-              <ul className="space-y-2 mb-4">
-                {subjects.map((subj) => (
-                  <li key={subj.id} className="flex justify-between bg-gray-700/60 p-4 rounded-lg">
-                    {subj.name}
-                    <button onClick={() => handleDeleteSubject(subj.id)} className="text-red-400 hover:text-red-500">Delete</button>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex gap-2 flex-col sm:flex-row">
-                <input
-                  value={newCourseName}
-                  onChange={(e) => setNewCourseName(e.target.value)}
-                  placeholder="New Course Name"
-                  className="flex-1 bg-gray-700/60 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-                <button onClick={handleAddSubject} className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg">Add</button>
-              </div>
-            </div>
-          )}
 
           {(action === 'add' || action === 'edit') && (
             <div>
@@ -493,6 +510,8 @@ export default function ActivityManagementPage() {
               )}
             </div>
           )}
+          </div>
+        
         </section>
       </div>
     </div>

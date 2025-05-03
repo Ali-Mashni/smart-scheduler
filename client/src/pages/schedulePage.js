@@ -232,8 +232,14 @@ export default function StudentSchedulePage() {
   const dateRange = isMobile ? mobileDay : weekDates;
   const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
 
+  const getDurationInHours = (startTime, endTime) => {
+    const [startH, startM] = startTime.split(':').map(Number);
+    const [endH, endM] = endTime.split(':').map(Number);
+    return (endH + endM / 60) - (startH + startM / 60);
+  };
+
   return (
-    <div className="min-h-screen bg-bgMain text-white font-sans">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden overflow-auto bg-bgMain text-white font-sans">
       <TopBar>
         <TopBarButton to="/activityManagement">Activity Management</TopBarButton>
         <TopBarButton to="/schedule" active>Schedule</TopBarButton>
@@ -247,17 +253,17 @@ export default function StudentSchedulePage() {
 
       <main className="flex flex-col lg:flex-row gap-6 p-6">
         {/* Schedule Section */}
-        <section className="flex-1 bg-bgCard p-4 rounded-xl shadow-md max-h-[80vh] overflow-auto relative">
+        <section className="flex-1 bg-bgCard rounded-xl shadow-md max-h-[80vh] overflow-auto relative">
           <div className="sticky top-0 z-20 bg-bgCard pb-2">
             <div className="flex justify-between items-center mb-2">
               <button onClick={() => isMobile ? setDayOffset(dayOffset - 1) : setWeekOffset(weekOffset - 1)} className="bg-primaryHover px-3 py-1 rounded">←</button>
               <span className="font-bold text-lg">Week of {displayDate(dateRange[0])}</span>
               <button onClick={() => isMobile ? setDayOffset(dayOffset + 1) : setWeekOffset(weekOffset + 1)} className="bg-primaryHover px-3 py-1 rounded">→</button>
             </div>
-            <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-8'} border-b border-gray-600`}>
-              <div className="p-2 font-bold">Time</div>
+            <div className={`p-2 grid ${isMobile ? 'grid-cols-2' : 'grid-cols-8'} border-b border-gray-600`}>
+              <div className="p-2 font-bold border-r border-gray-600">Time</div>
               {dateRange.map((date, index) => (
-                <div key={formatDate(date)} className={`p-2 text-center font-bold ${index !== dateRange.length - 1 ? 'border-r border-gray-600' : ''} ${formatDate(date) === formatDate(new Date()) ? 'text-accent' : ''}`}>
+                <div key={formatDate(date)} className={`text-sm p-2 text-center font-bold ${index !== dateRange.length - 1 ? 'border-r border-gray-600' : ''} ${formatDate(date) === formatDate(new Date()) ? 'text-accent' : ''}`}>
                   {displayDate(date)}
                 </div>
               ))}
@@ -265,17 +271,25 @@ export default function StudentSchedulePage() {
           </div>
 
           {/* Hour grid */}
-          <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-8'}`}>
+          <div className={`p-2 grid  ${isMobile ? 'grid-cols-2' : 'grid-cols-8'} `}>
             {hours.map((hour, hourIndex) => (
               <React.Fragment key={hour}>
-                <div ref={(el) => hourRefs.current[hourIndex] = el} className="p-2 font-mono text-sm border-t border-gray-600">{hour}</div>
+                <div ref={(el) => hourRefs.current[hourIndex] = el} className="p-2 font-mono text-sm border-t border-r border-gray-600">{hour}</div>
                 {dateRange.map((date, index) => {
                   const dateStr = formatDate(date);
                   const activity = getActivityForSlot(dateStr, hour);
                   return (
-                    <div key={dateStr + hour} className={`h-16 p-1 border-t border-gray-600 ${index !== dateRange.length - 1 ? 'border-r border-gray-600' : ''}`}>
+                    <div key={dateStr + hour} className={` border-t border-gray-600 ${index !== dateRange.length - 1 ? 'border-r border-gray-600' : ''}`}
+                    style={{
+                      top: 0,
+                      height: '60px',
+                    }}>
                       {activity && (
-                        <div className={`w-full h-full rounded-md px-2 py-1 text-xs ${getColorByType(activity.activityType)}`}>
+                        
+                        <div className={`w-full rounded-md px-2 py-1 text-xs ${getColorByType(activity.activityType)}` }
+                        style={{
+                          height:`${getDurationInHours(activity.startTime, activity.endTime) * 60}px`,
+                        }}>
                           {activity.activityName}
                         </div>
                       )}
