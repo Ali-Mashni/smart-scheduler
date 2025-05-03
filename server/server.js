@@ -23,6 +23,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/student', require('./routes/studentRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/support/faqs', require('./routes/supportFaqRoutes'));
 app.use('/api/support/requests', require('./routes/supportRequestRoutes'));
 app.use('/api/support/messages', require('./routes/supportMessageRoutes'));

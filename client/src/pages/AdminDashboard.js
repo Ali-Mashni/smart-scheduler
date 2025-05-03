@@ -1,126 +1,103 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TopBar from '../components/TopBar';
 import TopBarButton from '../components/TopBarButton';
 import TicketModal from '../components/TicketModal';
 import AccountSettingsModal from '../components/AccountSettingsModal';
 import StatisticsModal from '../components/StatisticsModal';
+import api from '../api';
 
 export default function AdminDashboard() {
-    // Mock data for the dashboard
-    const adminName = "Haitham Alzahrani";
-
-    // Mock data for unresolved escalated requests 
-    const unresolvedTickets = [
-        {
-            id: "#6493",
-            avatar: "D",
-            title: "Lost my Schedule",
-            description: "Customer unable to see any scheduled tasks after update.",
-            status: "Overdue by 3 days",
-            statusColor: "red",
-            timeLabel: "Customer responded 1h ago"
-        },
-        {
-            id: "#6587",
-            avatar: "K",
-            title: "Can't access my calendar",
-            description: "Calendar page stuck on loading indefinitely.",
-            status: "Respond in 2h",
-            statusColor: "blue",
-            timeLabel: "Customer responded 3h ago"
-        },
-        {
-            id: "#6721",
-            avatar: "M",
-            title: "Schedule not syncing",
-            description: "Customer's schedule is not syncing between their devices.",
-            status: "Overdue by 1 day",
-            statusColor: "red",
-            timeLabel: "Customer responded 5h ago"
-        },
-        {
-            id: "#6845",
-            avatar: "A",
-            title: "Missing study sessions",
-            description: "Customer reports that their study sessions are not showing in the calendar.",
-            status: "Respond in 4h",
-            statusColor: "blue",
-            timeLabel: "Customer responded 30m ago"
-        },
-        {
-            id: "#6901",
-            avatar: "S",
-            title: "Notification issues",
-            description: "Customer is not receiving scheduled notifications for their events.",
-            status: "Overdue by 2 days",
-            statusColor: "red",
-            timeLabel: "Customer responded 2h ago"
-        },
-    ];
-
-    // Mock data for solved tickets
-    const solvedTickets = [
-        {
-            id: "#6201",
-            avatar: "J",
-            title: "Account login issue",
-            description: "Customer was unable to login due to password reset issues. Fixed by sending a new reset link.",
-            status: "Solved",
-            statusColor: "green",
-            timeLabel: "Resolved 2d ago"
-        },
-        {
-            id: "#6325",
-            avatar: "L",
-            title: "Task reminders not working",
-            description: "Customer's notification settings were disabled. Helped them enable notifications.",
-            status: "Solved",
-            statusColor: "green",
-            timeLabel: "Resolved 1d ago"
-        },
-        {
-            id: "#6418",
-            avatar: "R",
-            title: "Calendar export failing",
-            description: "Export feature was failing due to browser compatibility. Provided alternative method.",
-            status: "Solved",
-            statusColor: "green",
-            timeLabel: "Resolved 4h ago"
-        },
-    ];
-
-    // Statistics data
-    const statisticsData = {
-        newUsers: 586,
-        activeUsers: "95%",
-        closedRequests: "80%"
-    };
+    // State for user data
+    const [adminName, setAdminName] = useState("Admin");
+    const [unresolvedTickets, setUnresolvedTickets] = useState([]);
+    const [solvedTickets, setSolvedTickets] = useState([]);
+    const [customerServiceStaff, setCustomerServiceStaff] = useState([]);
+    const [statisticsData, setStatisticsData] = useState({
+        totalUsers: 0,
+        totalRequests: 0,
+        resolvedRequests: 0,
+        solvedRate: "0%"
+    });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // track which category is selected
     const [activeCategory, setActiveCategory] = useState('unresolved');
 
     // active ticket list based on selected category
-    const [escalatedRequests, setEscalatedRequests] = useState(unresolvedTickets);
+    const [escalatedRequests, setEscalatedRequests] = useState([]);
+
+    // Fetch admin user data
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const decoded = JSON.parse(atob(token.split('.')[1]));
+                fetchUserData(decoded.id);
+            } catch (err) {
+                console.error('Error decoding token:', err);
+                setError('Session expired. Please login again.');
+            }
+        }
+    }, []);
+
+    // Fetch user data
+    const fetchUserData = async (userId) => {
+        try {
+            const res = await api.get(`/api/auth/user/${userId}`);
+            if (res.data.success) {
+                setAdminName(`${res.data.data.firstName} ${res.data.data.lastName}`);
+            }
+        } catch (err) {
+            console.error('Error fetching user data:', err);
+        }
+    };
+
+    // Fetch all data
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                // Fetch escalated tickets
+                const escalatedRes = await api.get('/api/admin/tickets/escalated');
+                setUnresolvedTickets(escalatedRes.data.data);
+
+                // Fetch resolved tickets
+                const resolvedRes = await api.get('/api/admin/tickets/resolved');
+                setSolvedTickets(resolvedRes.data.data);
+
+                // Fetch support staff
+                const staffRes = await api.get('/api/admin/support-staff');
+                setCustomerServiceStaff(staffRes.data.data);
+
+                // Fetch statistics
+                const statsRes = await api.get('/api/admin/statistics');
+                setStatisticsData(statsRes.data.data);
+
+                // Set initial active category
+                setEscalatedRequests(escalatedRes.data.data);
+
+                setLoading(false);
+            } catch (err) {
+                console.error('Error fetching dashboard data:', err);
+                setError('Failed to load dashboard data. Please try refreshing the page.');
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
 
     //  category change
     const handleCategoryChange = (category) => {
         setActiveCategory(category);
         setSelectedTicket(null);
 
-        if (category === 'unresolved') {
-            setEscalatedRequests(unresolvedTickets);
-        } else {
-            setEscalatedRequests(solvedTickets);
-        }
+        // Get the current tickets based on category
+        const ticketsToDisplay = category === 'unresolved' ? unresolvedTickets : solvedTickets;
+        setEscalatedRequests(ticketsToDisplay);
     };
-
-    // Mock data for customer service staff
-    const customerServiceStaff = [
-        { id: "1", name: "Khalid", progress: 87 },
-        { id: "2", name: "Ahmed", progress: 70 },
-        { id: "3", name: "Ziad", progress: 92 },
-        { id: "4", name: "Fahad", progress: 67 },
-    ];
 
     // modal State
     const [selectedTicket, setSelectedTicket] = useState(null);
@@ -159,50 +136,126 @@ export default function AdminDashboard() {
 
     // Handle logout
     const handleLogout = () => {
-        // In a real app, you would implement actual logout logic here
-        console.log('Logging out...');
+        localStorage.removeItem('token');
         window.location.href = '/login';
     };
 
     // Handle resolving a ticket
-    const handleResolveTicket = (ticketId) => {
-        // Only apply this logic to unresolved tickets
-        if (activeCategory === 'unresolved') {
-            // Find the ticket being resolved
-            const resolvedTicket = unresolvedTickets.find(ticket => ticket.id === ticketId);
+    const handleResolveTicket = async (ticketId) => {
+        try {
+            // Only apply this logic to unresolved tickets
+            if (activeCategory === 'unresolved') {
+                // Extract the actual MongoDB ID if it's in the format "#id"
+                const actualId = ticketId.startsWith('#') ? ticketId.substring(1) : ticketId;
 
-            if (resolvedTicket) {
-                // Create a new resolved ticket with updated status
-                const newSolvedTicket = {
-                    ...resolvedTicket,
-                    status: "Solved",
-                    statusColor: "green",
-                    timeLabel: "Resolved just now"
-                };
+                // Call API to resolve the ticket
+                const res = await api.put(`/api/admin/tickets/${actualId}/resolve`);
 
-                // Add to solved tickets
-                solvedTickets.unshift(newSolvedTicket);
+                if (res.data.success) {
+                    // Find the resolved ticket before removing it
+                    const resolvedTicket = unresolvedTickets.find(ticket =>
+                        ticket._id === actualId || ticket.id === ticketId
+                    );
 
-                // Remove from unresolved and update display
-                const updatedUnresolved = unresolvedTickets.filter(ticket => ticket.id !== ticketId);
+                    // Remove the ticket from unresolved tickets (exclude the resolved ticket)
+                    const updatedUnresolved = unresolvedTickets.filter(ticket =>
+                        !(ticket._id === actualId || ticket.id === ticketId)
+                    );
 
-                // Update state
-                setEscalatedRequests(updatedUnresolved);
+                    // Update the unresolved tickets state
+                    setUnresolvedTickets(updatedUnresolved);
+
+                    if (resolvedTicket) {
+                        // Create a new resolved ticket with updated status
+                        const newSolvedTicket = {
+                            ...resolvedTicket,
+                            status: "Solved",
+                            statusColor: "green",
+                            timeLabel: "Resolved just now"
+                        };
+
+                        // Add to solved tickets
+                        setSolvedTickets(prev => [newSolvedTicket, ...prev]);
+                    }
+
+                    // Update the displayed escalated requests
+                    setEscalatedRequests(updatedUnresolved);
+
+                    // Close the modal
+                    setSelectedTicket(null);
+                }
             }
+        } catch (err) {
+            console.error('Error resolving ticket:', err);
+            alert('Failed to resolve ticket. Please try again.');
         }
     };
 
     // Handle reassigning a ticket
-    const handleReassignTicket = (ticketId, agentId, message) => {
-        // In a real send this to the backend
-        console.log(`Reassigning ticket ${ticketId} to agent ${agentId} with message: ${message}`);
+    const handleReassignTicket = async (ticketId, agentId, message) => {
+        try {
+            // Extract the actual MongoDB ID if it's in the format "#id"
+            const actualId = ticketId.startsWith('#') ? ticketId.substring(1) : ticketId;
 
-        // Only remove from unresolved tickets
-        if (activeCategory === 'unresolved') {
-            const updatedRequests = escalatedRequests.filter(ticket => ticket.id !== ticketId);
-            setEscalatedRequests(updatedRequests);
+            // Call API to reassign the ticket
+            const res = await api.put(`/api/admin/tickets/${actualId}/reassign`, {
+                agentId,
+                message
+            });
+
+            if (res.data.success) {
+                // If in unresolved category, update the display
+                if (activeCategory === 'unresolved') {
+                    // Find the ticket and update its assignment
+                    const updatedTickets = unresolvedTickets.map(ticket => {
+                        if (ticket._id === actualId || ticket.id === ticketId) {
+                            // Find the agent name
+                            const agent = customerServiceStaff.find(a => a.id === agentId);
+                            return {
+                                ...ticket,
+                                assignedAgent: agentId,
+                                timeLabel: `Reassigned to ${agent ? agent.name : 'agent'} just now`
+                            };
+                        }
+                        return ticket;
+                    });
+
+                    setUnresolvedTickets(updatedTickets);
+                    setEscalatedRequests(updatedTickets);
+                }
+
+                // Close the modal
+                setSelectedTicket(null);
+            }
+        } catch (err) {
+            console.error('Error reassigning ticket:', err);
+            alert('Failed to reassign ticket. Please try again.');
         }
     };
+
+    // Show loading indicator
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-bgMain text-white flex flex-col items-center justify-center">
+                <div className="text-xl">Loading dashboard data...</div>
+            </div>
+        );
+    }
+
+    // Show error message
+    if (error) {
+        return (
+            <div className="min-h-screen bg-bgMain text-white flex flex-col items-center justify-center">
+                <div className="text-xl text-red-500 mb-4">{error}</div>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="bg-primary hover:bg-opacity-80 px-4 py-2 rounded-md"
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-bgMain text-white flex flex-col">
@@ -250,7 +303,7 @@ export default function AdminDashboard() {
                             className={`mb-2 text-sm rounded-md p-2.5 cursor-pointer ${activeCategory === 'solved' ? 'bg-primary' : 'bg-bgCard'}`}
                             onClick={() => handleCategoryChange('solved')}
                         >
-                            Escalated but Solved
+                            Solved Tickets
                             <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-700 rounded-md">{solvedTickets.length}</span>
                         </div>
                     </div>
@@ -263,49 +316,51 @@ export default function AdminDashboard() {
                             {activeCategory === 'unresolved' ? 'Unresolved Tickets' : 'Solved Tickets'}
                         </h1>
                         <div className="flex items-center text-sm">
-                            <div className="flex bg-bgCard rounded-md mr-4 overflow-hidden">
+                            <div className="flex bg-bgCard rounded-md overflow-hidden">
                                 <div className="bg-primary px-3 py-1.5">
                                     {activeCategory === 'unresolved' ? 'Open' : 'Closed'} ({escalatedRequests.length})
                                 </div>
                             </div>
-                            <div className="flex items-center text-gray-400">
-                                Sort by: Newest
-                                <span className="ml-1 text-xs">▼</span>
-                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-3">
-                        {escalatedRequests.map((ticket) => (
-                            <div
-                                key={ticket.id}
-                                className="flex items-center bg-bgCard rounded-md p-4 cursor-pointer hover:bg-opacity-80"
-                                onClick={() => handleTicketClick(ticket)}
-                            >
-                                <div className="mr-4">
-                                    <input
-                                        type="checkbox"
-                                        className="w-4 h-4"
-                                        onClick={(e) => e.stopPropagation()}
-                                    />
-                                </div>
-                                <div className="mr-4 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                                    {ticket.avatar}
-                                </div>
-                                <div className="flex-grow">
-                                    <div className="text-sm font-medium">{ticket.title}</div>
-                                    <div className="text-xs text-gray-400">{ticket.timeLabel}</div>
-                                </div>
-                                <div className={`px-2 py-1 rounded text-xs mr-4 ${ticket.statusColor === 'red' ? 'bg-red-900 text-red-200'
+                    {escalatedRequests.length === 0 ? (
+                        <div className="flex items-center justify-center h-40 bg-bgCard rounded-md p-4">
+                            <p className="text-gray-400">No {activeCategory === 'unresolved' ? 'open' : 'resolved'} tickets found.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {escalatedRequests.map((ticket) => (
+                                <div
+                                    key={ticket.id}
+                                    className="flex items-center bg-bgCard rounded-md p-4 cursor-pointer hover:bg-opacity-80"
+                                    onClick={() => handleTicketClick(ticket)}
+                                >
+                                    <div className="mr-4">
+                                        <input
+                                            type="checkbox"
+                                            className="w-4 h-4"
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </div>
+                                    <div className="mr-4 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                                        {ticket.avatar}
+                                    </div>
+                                    <div className="flex-grow">
+                                        <div className="text-sm font-medium">{ticket.title}</div>
+                                        <div className="text-xs text-gray-400">{ticket.timeLabel}</div>
+                                    </div>
+                                    <div className={`px-2 py-1 rounded text-xs mr-4 ${ticket.statusColor === 'red' ? 'bg-red-900 text-red-200'
                                         : ticket.statusColor === 'green' ? 'bg-green-900 text-green-200'
                                             : 'bg-blue-900 text-blue-200'
-                                    }`}>
-                                    {ticket.status}
+                                        }`}>
+                                        {ticket.status}
+                                    </div>
+                                    <div className="text-sm text-gray-400">{ticket.id}</div>
                                 </div>
-                                <div className="text-sm text-gray-400">{ticket.id}</div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Sidebar */}
@@ -321,20 +376,20 @@ export default function AdminDashboard() {
                         <div className="flex justify-center items-center h-32 relative">
                             <div className="absolute w-20 h-20 rounded-full flex items-center justify-center text-center text-xs border-4 border-indigo-700 bg-bgMain left-6 top-2">
                                 <div>
-                                    <div>{statisticsData.newUsers}</div>
-                                    <div className="text-gray-400">New Users</div>
+                                    <div>{statisticsData.totalUsers || 0}</div>
+                                    <div className="text-gray-400">Total Users</div>
                                 </div>
                             </div>
                             <div className="absolute w-32 h-32 rounded-full flex items-center justify-center text-center text-sm border-4 border-indigo-700 bg-indigo-700 right-2">
                                 <div>
-                                    <div className="text-lg font-bold">{statisticsData.activeUsers}</div>
-                                    <div className="text-xs">Active Users</div>
+                                    <div className="text-lg font-bold">{statisticsData.totalRequests || 0}</div>
+                                    <div className="text-xs">Total Tickets</div>
                                 </div>
                             </div>
-                            <div className="absolute w-24 h-24 rounded-full flex items-center justify-center text-center text-xs border-4 border-purple-600 bg-bgMain bottom-0 left-12">
+                            <div className="absolute w-24 h-24 rounded-full flex items-center justify-center text-center text-xs border-4 border-green-600 bg-bgMain bottom-0 left-12">
                                 <div>
-                                    <div>{statisticsData.closedRequests}</div>
-                                    <div className="text-gray-400">Closed Requests</div>
+                                    <div>{statisticsData.solvedRate || "0%"}</div>
+                                    <div className="text-gray-400">Solved Rate</div>
                                 </div>
                             </div>
                         </div>
@@ -342,17 +397,25 @@ export default function AdminDashboard() {
 
                     <div>
                         <div className="text-sm font-medium mb-4">Customer Service</div>
-                        {customerServiceStaff.map((staff) => (
-                            <div key={staff.id} className="flex items-center justify-between mb-3">
-                                <div className="text-sm">{staff.name}</div>
-                                <div className="flex items-center">
-                                    <div className="text-xs text-gray-400 mr-2">Progress: {staff.progress}%</div>
-                                    <button className="text-gray-400 hover:text-white">
-                                        <span className="text-xl">✉️</span>
-                                    </button>
+                        {customerServiceStaff.length === 0 ? (
+                            <div className="text-gray-400 text-sm">No support staff found.</div>
+                        ) : (
+                            customerServiceStaff.map((staff) => (
+                                <div key={staff.id} className="flex items-center justify-between mb-3">
+                                    <div className="text-sm">{staff.name}</div>
+                                    <div className="flex items-center">
+                                        <div className="text-xs text-gray-400 mr-2">
+                                            Progress: {staff.ticketsAssigned > 0
+                                                ? Math.round((staff.ticketsHandled / staff.ticketsAssigned) * 100)
+                                                : 0}%
+                                        </div>
+                                        <button className="text-gray-400 hover:text-white">
+                                            <span className="text-xl">✉️</span>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </div>
             </div>

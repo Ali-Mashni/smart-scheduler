@@ -11,7 +11,10 @@ const supportRequestSchema = new mongoose.Schema({
     type: String,
     enum: ['Pending', 'In Progress', 'Resolved', 'Dismissed', 'Escalated'],
     default: 'Pending'
-  }
+  },//this is to give feedback for admin contact haitham for any details 
+  previousStatus: { type: String },
+  resolvedAt: { type: Date },
+  notes: { type: String }
 }, { timestamps: true });
 
 module.exports = mongoose.model('SupportRequest', supportRequestSchema);
