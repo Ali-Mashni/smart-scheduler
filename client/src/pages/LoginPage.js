@@ -14,19 +14,20 @@ export default function LoginPage({ setUser }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const { role } = JSON.parse(atob(token.split('.')[1]));
-        setUser({ role });
-        if (role === 'student') return navigate('/schedule');
-        if (role === 'admin') return navigate('/admin');
-        if (role === 'support') return navigate('/faq-management');
-      } catch {
-        localStorage.removeItem('token');
-      }
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const { id, role } = JSON.parse(atob(token.split('.')[1]));
+      setUser({ id, role });
+      if (role === 'student') return navigate('/schedule');
+      if (role === 'admin') return navigate('/admin');
+      if (role === 'support') return navigate('/faq-management');
+    } catch {
+      localStorage.removeItem('token'); // Clean up if token is corrupted
     }
-  }, [navigate, setUser]);
+  }
+}, [navigate, setUser]);
+
 
   const handleLogin = async e => {
     e.preventDefault();
@@ -42,8 +43,9 @@ export default function LoginPage({ setUser }) {
       localStorage.setItem('token', token);
 
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const { role } = payload;
-      setUser({ role });
+      const { id, role } = payload;
+      setUser({ id, role });
+
 
       if (role === 'student') navigate('/schedule');
       else if (role === 'admin') navigate('/admin');

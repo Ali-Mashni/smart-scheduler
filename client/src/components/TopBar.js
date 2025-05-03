@@ -6,7 +6,7 @@ export default function TopBar({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="w-full bg-bgMain shadow-md px-4 py-2">
+    <div className="w-full bg-bgMain shadow-md px-4 py-2 lg:max-h-[calc(80px)]">
       <div className="max-w-7xl mx-auto flex items-center justify-between relative">
         {/* Logo with link to home */}
         <Link to="/" className="flex items-center gap-2">

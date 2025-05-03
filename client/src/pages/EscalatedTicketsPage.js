@@ -65,7 +65,7 @@ export default function EscalatedTicketsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-bgMain text-white">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden overflow-auto bg-bgMain text-white">
       <TopBar>
         <TopBarButton to="/manage-requests">Manage Requests</TopBarButton>
         <TopBarButton to="/faq-management">FAQ Management</TopBarButton>

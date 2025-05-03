@@ -36,7 +36,7 @@ export default function FAQPage() {
   const toggle = id => setExpandedId(prev => (prev === id ? null : id));
 
   return (
-    <div className="min-h-screen bg-bgMain text-white">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden overflow-auto bg-bgMain text-white">
       <TopBar>
         <TopBarButton to="/">Home</TopBarButton>
         <TopBarButton to="/faq" active>FAQ</TopBarButton>
