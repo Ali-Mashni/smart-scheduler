@@ -4,6 +4,20 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// ✅ GLOBAL FETCH PATCH for "api/..." to use backend base URL
+const originalFetch = window.fetch;
+const BASE_URL = process.env.REACT_APP_API_URL;
+
+window.fetch = (input, init) => {
+  if (typeof input === 'string' && input.startsWith('api/')) {
+    input = `${BASE_URL}/${input.replace(/^\/+/, '')}`;
+  } else if (input instanceof Request && input.url.startsWith('api/')) {
+    input = new Request(`${BASE_URL}/${input.url}`, input);
+  }
+  return originalFetch(input, init);
+};
+
+// ✅ React entry point
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
@@ -11,7 +25,4 @@ root.render(
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
