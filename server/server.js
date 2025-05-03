@@ -14,7 +14,10 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: 'http://localhost:3000',  // your React dev server
+    origin: [
+      'http://localhost:3000', 
+      'https://smart-scheduler-frontend.onrender.com' 
+    ],
     credentials: true
   })
 );
