@@ -87,7 +87,7 @@ export default function ManageRequestsPage() {
       <div className="p-8">
         <h2 className="text-2xl font-bold mb-4">Manage User Requests</h2>
         <div className="flex flex-col md:flex-row gap-6">
-          <div className="w-full md:w-1/3 bg-bgCard p-4 rounded">
+          <div className="w-full md:w-1/3 bg-bgCard p-4 rounded max-h-[70vh] overflow-y-auto">
             {availableTickets.length === 0 ? (
               <p className="text-gray-400">No requests available.</p>
             ) : (
