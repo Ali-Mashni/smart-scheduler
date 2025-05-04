@@ -68,57 +68,117 @@ This will launch the React app locally at:
 `http://localhost:3000`
 
 ---
+## 🔧 Step 3: Run the Backend (Node.js + Express)
+
+> ⚠️ **Note for Graders:** The `.env.example` file included in this repository contains real credentials for evaluation purposes. These secrets will be **rotated after grading**.
+
+Open a new terminal, then:
+
+1. Navigate to the backend folder:
+
+```bash
+
+cd server
+```
+
+2. Create a `.env` file using the example:
+
+- On Linux/macOS:
+
+```bash
+
+cp .env.example .env
+```
+
+- On Windows:
+
+```bash
+copy .env.example .env
+```
+
+3. Install backend dependencies:
+
+```bash
+
+npm install
+```
+
+4. Start the backend server:
+
+```bash
+
+node server.js
+```
+
+This will run the backend at:  
+**http://localhost:5050** (or the port defined in `.env`)
+
+> ✅ Make sure both the **frontend (on port 3000)** and **backend (on port 5050)** are running at the same time.
+
+---
 ## 🧪 Usage Instructions and Examples
 
-After running the app (`npm start`), the browser will automatically open to the **Home Page**:
+After launching the app (`npm start`), your browser will automatically open to the **Home Page**:
 
-![Home Page](./client/src/assets/Phase1_images/homePage.png) 
+![Home Page](./client/src/assets/Phase1_images/homePage.png)
 
 From here, users can:
 
-- Explore the content of the home page.
-- Navigate to `Login`, `Signup`, or `FAQ` using the top navigation bar.
+- Explore the content of the homepage
+- Navigate using the top navigation bar to access:
+  - `Login`
+  - `Signup`
+  - `FAQ`
+
+---
 
 ### 🔐 Login Behavior
 
-The app uses **hardcoded mock users** for demonstration during Phase 5. Based on login credentials, users will be redirected to different dashboard pages:
+The system uses **hardcoded mock users** for demonstration in Phase 5. Depending on the login credentials, users are redirected to their respective dashboards.
 
-| Role               | Username   | Password | Redirected Page  |
-|--------------------|------------|----------|------------------|
-| Admin              | `admin`    | `admin`  | `/admin`         |
-| Student            | `student`  | `123`    | `/schedule`      |
-| Customer Service   | `support`  | `helpme` | `/faq-management`|
+#### ✅ Most Important Credentials
 
-To test this:
-1. Click `Login` from the top bar.
-2. Enter any of the above credential pairs.
-3. You will be redirected to the corresponding interface.
+| Role             | Email                            | Password | Redirected Page       |
+|------------------|----------------------------------|----------|------------------------|
+| Admin            | `admin@test.com`                 | `123`    | `/admin`              |
+| Student (User)   | `k@emaple.com`                   | `123`    | `/schedule`           |
+| Customer Service | `khaledsupport2@example.com`     | `1234`   | `/faq-management`     |
 
-Each role has a different UI depending on their responsibilities.
+> 🔒 **Note:** You can only register as a **Student** using the Signup form.  
+> Admin and Customer Service accounts are pre-seeded and cannot be created manually.
 
-> This login system is mock-only and will be replaced with real backend authentication in future phases.
+**To test:**
+
+1. Click `Login` from the navigation bar  
+2. Enter one of the email/password combinations listed above  
+3. You will be redirected to the corresponding dashboard
+
+> ⚠️ This login mechanism is **mock-only** and will be replaced by real backend authentication in future development phases.
+
+---
 
 ### 🧭 Role-Based Walkthrough (With Examples)
 
 #### 📝 Signup Page
 
-The **Signup Page** showcases a modern form with a two-panel layout and built-in input validation. It is currently mock-only (non-functional backend) but includes real-time checks for:
+The **Signup Page** offers a responsive, two-panel layout with real-time input validation. It supports only **Student** registration and checks for:
 
-- Empty required fields (all fields must be filled)
-- Valid email format
-- Minimum password length (8 characters)
-- Matching password and confirmation fields
+- Required fields being filled
+- Valid email formatting
+- Password length (min. 8 characters)
+- Matching password confirmation
 
 ![Signup Page](./client/src/assets/Phase1_images/signup.png)
 
 ---
+
 #### 🛠️ Admin Interface
 
 1. Go to the `Login` page.
-2. Use the credentials:
-   - **Username**: `admin`  
-   - **Password**: `admin`
-3. You will be redirected to the **Admin Dashboard** (`/admin`).
+2. Use the following credentials:
+   - **Email**: `admin@test.com`  
+   - **Password**: `123`
+3. You will be redirected to the **Admin Dashboard** at `/admin`.
 
 Example screenshots:
 
@@ -129,11 +189,11 @@ Example screenshots:
 
 #### 🎓 Student Interface
 
-1. Return to the `Login` page.
-2. Use the credentials:
-   - **Username**: `student`  
+1. Go to the `Login` page.
+2. Use the following credentials:
+   - **Email**: `k@emaple.com`  
    - **Password**: `123`
-3. You will be redirected to the **Student Schedule Page** (`/schedule`).
+3. You will be redirected to the **Student Schedule Page** at `/schedule`.
 
 Example screenshots:
 
@@ -144,16 +204,17 @@ Example screenshots:
 
 #### 💬 Customer Service Interface
 
-1. Go back to the `Login` page again.
-2. Use the credentials:
-   - **Username**: `support`  
-   - **Password**: `helpme`
-3. You will be redirected to the **FAQ Management Page** (`/faq-management`).
+1. Go to the `Login` page.
+2. Use the following credentials:
+   - **Email**: `khaledsupport2@example.com`  
+   - **Password**: `1234`
+3. You will be redirected to the **FAQ Management Page** at `/faq-management`.
 
 Example screenshots:
 
 - ![Support Dashboard - Overview](./client/src/assets/Phase1_images/support_dashboard_1.png)
 - ![Support Dashboard - Requests](./client/src/assets/Phase1_images/support_dashboard_2.png)
+
 ##  Team Members
 
 | Name               | Role / Contribution                                                                 |
