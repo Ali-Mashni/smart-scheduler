@@ -70,7 +70,7 @@ This will launch the React app locally at:
 ---
 ## 🔧 Step 3: Run the Backend (Node.js + Express)
 
-> ⚠️ **Note for Graders:** The `.env.example` file included in this repository contains real credentials for evaluation purposes. These secrets will be **rotated after grading**.
+> ⚠️ > ⚠️ **Note for Graders:** To obtain the required `.env` file containing backend environment variables, please contact **Ali Mashni** directly via **Microsoft Teams** or **email**.
 
 Open a new terminal, then:
 
@@ -81,32 +81,19 @@ Open a new terminal, then:
 cd server
 ```
 
-2. Create a `.env` file using the example:
+2. Create a new `.env` file and paste the values provided to you by Ali Mashni.
 
-- On Linux/macOS:
-
-```bash
-
-cp .env.example .env
-```
-
-- On Windows:
-
-```bash
-copy .env.example .env
-```
+> 💡 Do **not** use `.env.example` — it contains only placeholder values.
 
 3. Install backend dependencies:
 
 ```bash
-
 npm install
 ```
 
 4. Start the backend server:
 
 ```bash
-
 node server.js
 ```
 
