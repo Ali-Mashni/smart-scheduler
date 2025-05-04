@@ -70,7 +70,7 @@ This will launch the React app locally at:
 ---
 ## 🔧 Step 3: Run the Backend (Node.js + Express)
 
-> ⚠️ > ⚠️ **Note for Graders:** To obtain the required `.env` file containing backend environment variables, please contact **Ali Mashni** directly via **Microsoft Teams** or **email**.
+> ⚠️  **Note for Graders:** To obtain the required `.env` file containing backend environment variables, please contact **Ali Mashni** directly via **Microsoft Teams** or **email**.
 
 Open a new terminal, then:
 
