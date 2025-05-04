@@ -128,7 +128,7 @@ The system uses **hardcoded mock users** for demonstration in Phase 5. Depending
 | Role             | Email                            | Password | Redirected Page       |
 |------------------|----------------------------------|----------|------------------------|
 | Admin            | `admin@test.com`                 | `123`    | `/admin`              |
-| Student (User)   | `t@t.com`                   | `12345678`    | `/schedule`           |
+| Student (User)   | `k@example.com`                   | `123`    | `/schedule`           |
 | Customer Service | `khaledsupport2@example.com`     | `1234`   | `/faq-management`     |
 
 > 🔒 **Note:** You can only register as a **Student** using the Signup form.  
@@ -178,8 +178,8 @@ Example screenshots:
 
 1. Go to the `Login` page.
 2. Use the following credentials:
-   - **Email**: `t@t.com`  
-   - **Password**: `12345678`
+   - **Email**: `k@example.com`  
+   - **Password**: `123`
 3. You will be redirected to the **Student Schedule Page** at `/schedule`.
 
 Example screenshots:
