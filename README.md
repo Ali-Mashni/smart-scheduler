@@ -140,7 +140,7 @@ The system uses **hardcoded mock users** for demonstration in Phase 5. Depending
 2. Enter one of the email/password combinations listed above  
 3. You will be redirected to the corresponding dashboard
 
-> ⚠️ This login mechanism is **mock-only** and will be replaced by real backend authentication in future development phases.
+
 
 ---
 
