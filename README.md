@@ -1,7 +1,12 @@
 #  Smart Scheduler
 
-A full-stack scheduling assistant built for the SWE 363 course. This project helps users manage their time and schedule smartly, using a **React frontend styled with Tailwind CSS**, a Node.js backend, and MongoDB database.
-Live Demo: [https://smart-scheduler-frontend.onrender.com/](https://smart-scheduler-frontend.onrender.com/) 
+A full-stack scheduling assistant for SWE 363 featuring:
+- **Frontend**: React + Tailwind CSS
+- **Backend**: Node.js + Express
+- **Database**: MongoDB
+
+**Live Demo**: [smart-scheduler-frontend.onrender.com](https://smart-scheduler-frontend.onrender.com/)
+
 ---
 
 ## 📁 Project Structure
