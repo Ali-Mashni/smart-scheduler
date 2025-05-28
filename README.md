@@ -206,6 +206,8 @@ Example screenshots:
 
 - ![Support Dashboard - Overview](./client/src/assets/Phase1_images/support_dashboard_1.png)
 - ![Support Dashboard - Requests](./client/src/assets/Phase1_images/support_dashboard_2.png)
+- ![Support Dashboard - Progress](./client/src/assets/Phase1_images/support_dashboard_3.png)
+- ![Support Dashboard - Communication](./client/src/assets/Phase1_images/support_dashboard_4.png)
 
 ##  Team Members
 
